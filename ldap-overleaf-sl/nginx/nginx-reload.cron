@@ -1,4 +1,4 @@
-* 2 * * * root /bin/bash cron/etc/init.d/nginx reload 
+* 2 * * * root /bin/bash /etc/init.d/nginx reload 
 #* * * * * root sleep 10; echo "Nginx relaoded" >> /var/log/cron.log 2>&1
 # Reload Nginx to reload the certificates (2am)
 
