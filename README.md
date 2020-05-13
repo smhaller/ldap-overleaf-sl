@@ -1,18 +1,16 @@
 # Overleaf Ldap Implementation
 
 This repo contains an improved, free ldap authentication and authorisation 
-for sharelatex/overleaf. Currently this repo uses sharelatex 2.2.0.
+for sharelatex/[overleaf](https://github.com/overleaf/overleaf) community 
+edition. Currently this repo uses sharelatex 2.2.0.
 
 The inital idea for this implementation was taken from 
 [worksasintended](https://github.com/worksasintended).
 
-This ldap authentication and authorisation for the overleaf community 
-edition [overleaf](https://github.com/overleaf/overleaf) uses ldapts.
-
 
 ### Limitations:
 
-This implementation uses *no* ldap bind user - it tries to bind to the ldap with 
+This implementation uses *no* ldap bind user - it tries to bind to the ldap (using ldapts) with 
 the uid and credentials of the user which tries to login.
 
 Only valid LDAP users can login. This module authenticates in any case against the specified LDAP server!
