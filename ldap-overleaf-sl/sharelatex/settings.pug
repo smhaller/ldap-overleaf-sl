@@ -1,0 +1,31 @@
+extends ../layout
+// SiHa: removed change password and other non usable settings 
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-12.col-lg-10.col-lg-offset-1
+					if ssoError
+						.alert.alert-danger
+							| #{translate('sso_link_error')}: #{translate(ssoError)}
+					.card
+						.page-header
+							h1  #{translate("account_settings")}
+						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
+
+							.row
+								.col-md-5
+							h3
+								| #{translate("sessions")}
+
+							div
+								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
+							
+							hr
+
+							h3
+								| Contact
+							div 
+								| If you need any help, please contact your sysadmins.
+							if !externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf)
+

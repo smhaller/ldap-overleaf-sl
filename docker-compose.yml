@@ -1,0 +1,119 @@
+version: '2.2'
+services:
+    sharelatex:
+        restart: always
+        image: ldap-overleaf-sl
+        container_name: ldap-overleaf-sl
+        depends_on:
+            mongo:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            simple-certbot:
+                condition: service_started
+        privileged: false
+        ports:
+            - 443:443
+        links:
+            - mongo
+            - redis
+            - simple-certbot
+        volumes:
+            - ${MYDATA}/sharelatex:/var/lib/sharelatex
+            - ${MYDATA}/letsencrypt:/etc/letsencrypt
+            - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
+        environment:
+            SHARELATEX_APP_NAME: Overleaf
+            SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
+            SHARELATEX_SITE_URL: https://${MYDOMAIN}
+            SHARELATEX_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
+            #SHARELATEX_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
+            SHARELATEX_ADMIN_EMAIL: ${MYMAIL}
+            SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
+            SHARELATEX_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
+            SHARELATEX_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
+            # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID: 
+            # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY: 
+            SHARELATEX_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
+            SHARELATEX_EMAIL_SMTP_PORT: 587
+            SHARELATEX_EMAIL_SMTP_SECURE: 'false'
+            # SHARELATEX_EMAIL_SMTP_USER: 
+            # SHARELATEX_EMAIL_SMTP_PASS: 
+            # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
+            # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
+            SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues." 
+
+            LDAP_SERVER: ldaps://LDAPSERVER:636
+            LDAP_BIND_BASE: ou=people,dc=DOMAIN,dc=TLD
+            # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
+            LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+            # if user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
+            LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+            LDAP_CONTACTS: 'true'
+
+            # Same property, unfortunately with different names in
+            # different locations
+            SHARELATEX_REDIS_HOST: redis
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+
+            ENABLED_LINKED_FILE_TYPES: 'url,project_file'
+
+            # Enables Thumbnail generation using ImageMagick
+            ENABLE_CONVERSIONS: 'true'
+
+    mongo:
+        restart: always
+        image: mongo
+        container_name: mongo
+        ports:
+            - 27017
+        volumes:
+            - ${MYDATA}/mongo_data:/data/db
+        healthcheck:
+            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+            interval: 10s
+            timeout: 10s
+            retries: 5
+
+    redis:
+        restart: always
+        image: redis
+        container_name: redis
+        # modify to get rid of the redis issue #35 and #19 with a better solution
+        # WARNING: /proc/sys/net/core/somaxconn is set to the lower value of 128.
+        # for vm overcommit: enable first on host system 
+        # sysctl vm.overcommit_memory=1 (and add it to rc.local)
+        # then you do not need it in the redis container
+        sysctls:
+            - net.core.somaxconn=65535
+            # - vm.overcommit_memory=1
+        ports:
+            - 6379
+        volumes:
+            - ${MYDATA}/redis_data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+
+    simple-certbot:
+        restart: always
+        image: certbot/certbot
+        container_name: simple-certbot
+        ports:
+            - 80:80
+        volumes:
+            - ${MYDATA}/letsencrypt:/etc/letsencrypt
+        # a bit hacky but this docker image uses very little disk-space
+        # best practices for ssl and nginx are set in the ldap-overleaf-sl Dockerfile
+        entrypoint: 
+            - "/bin/sh"
+            - -c
+            - | 
+              trap exit TERM;\
+              certbot certonly --standalone -d ${MYDOMAIN} --agree-tos -m ${MYMAIL} -n ; \
+              while :; do certbot renew; sleep 240h & wait $${!}; done;
+

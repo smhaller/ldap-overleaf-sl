@@ -1,0 +1,55 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.so
+*.o
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Python
+*.pyc
+
+
+# Editor tmp files
+*~
+*.swp
+*.swa
+*.lock
+.#*
+.swo
+*.kate-swp
+
+# BAK Files and Trash
+*.DS_Store
+*.out
+*.orig
+*.bak
+*.log
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+
