@@ -44,7 +44,7 @@ Edit the [.env](.env) file
 ```
 MYDOMAIN=example.com
 MYMAIL=email@example.com
-MYDATA="/data"
+MYDATA=/data
 ```
 
 *MYDATA* is the location (mount-point) for all data and will hold several directories:
