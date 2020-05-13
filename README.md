@@ -25,7 +25,7 @@ Only valid LDAP users can login. This module authenticates in any case against t
 - You can not invite non ldap users directly (via email) to projects (``link sharing`` is possible).
 
 *Important:*
-Sharelatex/overleaf uses the email adress to identify users: If you change the field in LDAP you have to update the corresponding field 
+Sharelatex/Overleaf uses the email adress to identify users: If you change the field in LDAP you have to update the corresponding field 
 in the mongo db - otherwise on the next login you have a new user in sharelatex.
 
 ```
@@ -54,8 +54,9 @@ MYDATA="/data"
 - sharelatex: all projects, tmp files, user files templates and ...
 - letsencrypt: https certificates
 
-*MYDOMAIN* is the FQDN for sharelatex, certbot (letsencrypt).
-*MYMAIL* is the admin mailadress.
+*MYDOMAIN* is the FQDN for sharelatex and certbot (letsencrypt)
+
+*MYMAIL* is the admin mailadress
 
 
 ### LDAP Configuration
@@ -86,9 +87,9 @@ LDAP_CONTACTS: 'false'
 ### Sharelatex Configuration
 
 EditSHARELATEX_ environment in [docker-compose.yml](docker-compose.yml) to fit your local setup. 
-See [https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide](Overleaf WIKI) for more details.
+See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
-## Installation, Usage and inital startup
+## Installation, Usage and Inital startup
 
 Install the docker engine: https://docs.docker.com/engine/install/
 
@@ -113,7 +114,7 @@ docker-compose up -d
 ```
 
 *Known Issue:*
-During the first startup the nginx-certbot image will get an initial certificate - if that 
+During the first startup the certbot image will get an initial certificate - if that 
 happens not in a very timley matter sharelatex will fail to start: Due to the missing certificates 
 nginx crashes. Solution: wait 10 seconds and restart the sharelatex container.
 
@@ -121,4 +122,7 @@ nginx crashes. Solution: wait 10 seconds and restart the sharelatex container.
 docker stop ldap-overleaf-sl 
 docker-compose up -d
 ```
+
+After the inital startup and certificate configuration you can reconfigure the 
+docker-compose.yml that port 80 points to the Sharelatex/Overleaf instance.
 
