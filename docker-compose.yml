@@ -46,7 +46,7 @@ services:
             LDAP_SERVER: ldaps://LDAPSERVER:636
             LDAP_BIND_BASE: ou=people,dc=DOMAIN,dc=TLD
             # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
-            LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+            LDAP_GROUP_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
             # if user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
             LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
             LDAP_CONTACTS: 'true'
