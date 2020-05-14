@@ -34,6 +34,12 @@ db.users.find({email:"EMAIL"}).pretty()
 db.users.update({email : OLDEMAIL},{$set: { email : NEWEMAIL}});
 ```
 
+## Coming soon
+
+- Option that Admins can invite non LDAP User
+
+
+
 ## Configuration
 
 ### Domain Configuration

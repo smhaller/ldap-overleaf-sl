@@ -59,7 +59,6 @@ const AuthenticationManager = {
       let pass = require("crypto").randomBytes(32).toString("hex")
       const userRegHand = require('../User/UserRegistrationHandler.js')
       userRegHand.registerNewUser({
-        //_id: uid,
         email: mail,
         first_name: firstname,
         last_name: lastname,
@@ -70,11 +69,7 @@ const AuthenticationManager = {
           console.log(error)
         }
         user.email = mail
-        if (isAdmin) {
-          user.admin = true
-        } else {
-          user.admin = false
-        }
+        user.isAdmin = isAdmin
         user.emails[0].confirmedAt = Date.now()
         user.save()
         //console.log("user %s added to local library: ", mail)
@@ -93,8 +88,19 @@ const AuthenticationManager = {
   },
 
   authUserObj(error, user, query, password, callback) {
-    // check if user is in ldap and logon if the ldapuser exists.
-    AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
+    // check if user is in ldap and logon if the ldapuser exists
+    // external email login
+    if (user && user.hashedPassword) {
+      console.log("email login for existing user")
+      bcrypt.compare(password, user.hashedPassword, function (error, match) {
+        if (match) {
+          console.log("Fine")
+          AuthenticationManager.login(user, password, callback)
+        }
+      })
+    } else {
+      AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
+    }
     return null
   },
 
