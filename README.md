@@ -68,8 +68,6 @@ LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
 # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
 # you have to set a group filter a minimal groupfilter would be: '(objectClass=person)'
 LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-# if user is in ADMIN_GROUP on user creation (2 first login) it sets isAdmin to true.
-LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 LDAP_CONTACTS: 'true'
 ```
 

@@ -305,9 +305,9 @@ const AuthenticationManager = {
 	  await client.unbind();
           return callback(null, null)
 	}
-
         try {
           // if admin filter is set - only set admin for user in ldap group
+          // does not matter - admin is deactivated: managed through ldap
 	  if (process.env.LDAP_ADMIN_GROUP_FILTER) { 
             const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(uid=' + uid + '))' 
             adminEntry = await client.search(ldap_base, {
