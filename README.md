@@ -63,7 +63,7 @@ Edit [docker-compose.yml](docker-compose.yml) to fit your local setup.
 
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
-LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
+LDAP_BASE: dc=DOMAIN,dc=TLD
 LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
 # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
 # you have to set a group filter a minimal groupfilter would be: '(objectClass=person)'
@@ -86,8 +86,7 @@ LDAP_CONTACTS: 'true'
 
 ### Sharelatex Configuration
 
-EditSHARELATEX_ environment in [docker-compose.yml](docker-compose.yml) to fit your local setup. 
-See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
+Edit SHARELATEX_ environment variables in [docker-compose.yml](docker-compose.yml) to fit your local setup (e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
 ## Installation, Usage and Inital startup
 
