@@ -86,8 +86,7 @@ LDAP_CONTACTS: 'true'
 
 ### Sharelatex Configuration
 
-EditSHARELATEX_ environment in [docker-compose.yml](docker-compose.yml) to fit your local setup. 
-See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
+Edit SHARELATEX_ environment variables in [docker-compose.yml](docker-compose.yml) to fit your local setup (e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
 ## Installation, Usage and Inital startup
 
