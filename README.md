@@ -63,23 +63,25 @@ Edit [docker-compose.yml](docker-compose.yml) to fit your local setup.
 
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
-LDAP_BIND_BASE: ou=people,dc=DOMAIN,dc=TLD
+LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
+LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
 # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
+# you have to set a group filter a minimal groupfilter would be: '(objectClass=person)'
 LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 # if user is in ADMIN_GROUP on user creation (2 first login) it sets isAdmin to true.
 LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 LDAP_CONTACTS: 'true'
 ```
 
-### Contacts 
+### LDAP Contacts 
 
-All users in the GROUPNAME are loaded from the ldap server into the contacts. At the moment 
-this happens every time you click on "Share" within a project.
+If you enable this, then all users in GROUPNAME are loaded from the ldap server into the contacts. 
+At the moment this happens every time you click on "Share" within a project.
 The user search happens without bind - so if your LDAP needs a bind you can adapt this in the 
 function `getLdapContacts()` in ContactsController.js (lines 82 - 107) 
-if you want to disable this function set:
+if you want to enable this function set:
 ```
-LDAP_CONTACTS: 'false'
+LDAP_CONTACTS: 'true'
 ```
 
 ### Sharelatex Configuration

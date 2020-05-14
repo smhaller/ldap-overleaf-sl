@@ -269,10 +269,11 @@ const AuthenticationManager = {
         });
         //const bindDn = process.env.LDAP_BIND_USER
         //const bindPassword = process.env.LDAP_BIND_PW
-        const ldap_bb = process.env.LDAP_BIND_BASE
+        const ldap_bd = process.env.LDAP_BINDDN
+        const ldap_base = process.env.LDAP_BASE
         const uid = query.email.split('@')[0]
         const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(uid=' + uid + '))'
-        const userDn = 'uid=' + uid + ',' + ldap_bb;
+        const userDn = 'uid=' + uid + ',' + ldap_bd;
         var mail = ""
         var firstname = ""
         var lastname = ""
@@ -287,7 +288,7 @@ const AuthenticationManager = {
         }
 	// get user data
         try {
-          const {searchEntries, searchRef,} = await client.search(ldap_bb, {
+          const {searchEntries, searchRef,} = await client.search(ldap_base, {
 		  scope: 'sub',
 		  filter: filterstr ,
 	  });
@@ -309,7 +310,7 @@ const AuthenticationManager = {
           // if admin filter is set - only set admin for user in ldap group
 	  if (process.env.LDAP_ADMIN_GROUP_FILTER) { 
             const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(uid=' + uid + '))' 
-            adminEntry = await client.search(ldap_bb, {
+            adminEntry = await client.search(ldap_base, {
 		    scope: 'sub',
 		    filter: adminfilter,
 	    });

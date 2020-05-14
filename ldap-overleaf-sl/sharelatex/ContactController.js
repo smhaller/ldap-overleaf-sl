@@ -86,10 +86,10 @@ module.exports = ContactsController = {
     const client = new Client({
     url: process.env.LDAP_SERVER,
     });
-    const ldap_bb = process.env.LDAP_BIND_BASE
+    const ldap_base = process.env.LDAP_BASE
     // get user data
     try {
-      const {searchEntries,searchReferences,} = await client.search(ldap_bb, {scope: 'sub',filter: process.env.LDAP_GROUP_FILTER ,});
+      const {searchEntries,searchReferences,} = await client.search(ldap_base, {scope: 'sub',filter: process.env.LDAP_GROUP_FILTER ,});
       await searchEntries;
       for (var i = 0; i < searchEntries.length; i++) {
        var entry = new Map()
