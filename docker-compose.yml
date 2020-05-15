@@ -48,9 +48,17 @@ services:
             LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
             # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
             LDAP_GROUP_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            #LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            # if user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
+
+            # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
+            # Admin Users can invite external (non ldap) users. This feature makes only sense 
+            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally adminsy can send 
+            # system wide messages.
             #LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+            ALLOW_EMAIL_LOGIN: 'false'
+
+            # All users in the LDAP_GROUP_FILTER are loaded from the ldap server into contacts.
+            # This LDAP search happens without bind. If you want this and your LDAP needs a bind you can 
+            # adapt this in the function getLdapContacts() in ContactsController.js (lines 82 - 107)
             LDAP_CONTACTS: 'false'
 
             # Same property, unfortunately with different names in

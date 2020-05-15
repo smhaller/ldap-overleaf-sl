@@ -13,16 +13,19 @@ RUN npm install ldapts
 
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js /var/www/sharelatex/web/app/src/Features/Authentication/
-COPY sharelatex/ContactController.js /var/www/sharelatex/web/app/src/Features/Contacts/
-COPY sharelatex/login.pug /var/www/sharelatex/web/app/views/user/login.pug
-COPY sharelatex/settings.pug /var/www/sharelatex/web/app/views/user/settings.pug
-COPY sharelatex/navbar.pug /var/www/sharelatex/web/app/views/layout/navbar.pug 
-COPY sharelatex/share.pug /var/www/sharelatex/web/app/views/project/editor/share.pug
+COPY sharelatex/ContactController.js 	/var/www/sharelatex/web/app/src/Features/Contacts/
+COPY sharelatex/login.pug 		/var/www/sharelatex/web/app/views/user/
+COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
+COPY sharelatex/navbar.pug 		/var/www/sharelatex/web/app/views/layout/
+COPY sharelatex/share.pug 		/var/www/sharelatex/web/app/views/project/editor/
+
+# Non LDAP User Reegistration for Admins
+COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.pug
+RUN rm  /var/www/sharelatex/web/app/views/admin/register.pug
 
 ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
 RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
 RUN touch /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
-
 
 ### Nginx and Certificates
 # enable https via letsencrypt
@@ -34,8 +37,6 @@ RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/
 RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem -O /etc/nginx/ssl-dhparams.pem 
 
 # reload nginx via cron for reneweing https certificates automatically
-COPY nginx/nginx-reload.cron  /etc/cron.d/nginx-cron
-RUN chmod 0744 /etc/cron.d/nginx-cron
-RUN touch /var/log/cron.log
-RUN crontab /etc/cron.d/nginx-cron
+COPY nginx/nginx-reload.sh  /etc/cron.weekly/
+RUN chmod 0744 /etc/cron.weekly/nginx-reload.sh
 

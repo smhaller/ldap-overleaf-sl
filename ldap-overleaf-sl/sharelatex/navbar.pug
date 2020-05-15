@@ -14,15 +14,8 @@ nav.navbar.navbar-default.navbar-main
 
 			ul.nav.navbar-nav.navbar-right
 				if (getSessionUser() && getSessionUser().isAdmin)
-					li.dropdown(class="subdued", dropdown)
-						a.dropdown-toggle(href, dropdown-toggle)
-							| Admin
-							b.caret
-						ul.dropdown-menu
-							li
-								a(href="/admin") Manage Site
-							li
-								a(href="/admin/user") Manage Users
+					li
+						a(href="/admin") Admin
 
 
 				// loop over header_extras

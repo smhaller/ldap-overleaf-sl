@@ -89,6 +89,7 @@ module.exports = ContactsController = {
     const ldap_base = process.env.LDAP_BASE
     // get user data
     try {
+      // if you need an client.bind do it here.
       const {searchEntries,searchReferences,} = await client.search(ldap_base, {scope: 'sub',filter: process.env.LDAP_GROUP_FILTER ,});
       await searchEntries;
       for (var i = 0; i < searchEntries.length; i++) {
@@ -99,7 +100,10 @@ module.exports = ContactsController = {
        entry['first_name'] = obj['givenName']
        entry['last_name'] = obj['sn']
        entry['type'] = "user"
-       contacts.push(entry)
+       // Only add to contacts if entry is not there.
+       if(contacts.indexOf(entry) === -1) {
+          contacts.push(entry);
+       }
       }
     } catch (ex) {
       console.log(String(ex))

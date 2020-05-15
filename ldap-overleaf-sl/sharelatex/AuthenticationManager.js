@@ -88,17 +88,23 @@ const AuthenticationManager = {
   },
 
   authUserObj(error, user, query, password, callback) {
-    // check if user is in ldap and logon if the ldapuser exists
-    // external email login
-    if (user && user.hashedPassword) {
-      console.log("email login for existing user")
-      bcrypt.compare(password, user.hashedPassword, function (error, match) {
-        if (match) {
-          console.log("Fine")
-          AuthenticationManager.login(user, password, callback)
-        }
-      })
+    if ( process.env.ALLOW_EMAIL_LOGIN ) {
+      // (external) email login 
+      if (user && user.hashedPassword) {
+        console.log("email login for existing user")
+        // check passwd against local db
+        bcrypt.compare(password, user.hashedPassword, function (error, match) {
+          if (match) {
+            console.log("Fine")
+            AuthenticationManager.login(user, password, callback)
+          }
+        })
+      } else {
+        // check passwd against ldap
+        AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
+      }
     } else {
+      // No local passwd check user has to be in ldap and use ldap credentials
       AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
     }
     return null
