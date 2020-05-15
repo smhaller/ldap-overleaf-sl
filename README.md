@@ -18,7 +18,7 @@ Only valid LDAP users or email users registered by an admin can login.
 This module authenticates against the local DB if `ALLOW_EMAIL_LOGIN` is set to `true` if this fails
 it tries to authenticate against the specified LDAP server. 
 
-*Therefore:*
+*Note:*
 - LDAP Users can not change their password for the ldap username login. They have to change it at the ldap server.
 - LDAP Users can reset their local db password. Then they can decide if they login with either their ldap user and password or with their email and local db password.
 - Users can not change their email. The email address is taken from the ldap server (mail) field. (or by invitation through an admin).
