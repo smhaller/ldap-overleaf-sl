@@ -14,20 +14,20 @@ This implementation uses *no* ldap bind user - it tries to bind to the ldap (usi
 the uid and credentials of the user which tries to login.
 
 
-Only valid LDAP users or Email-Users registerd by an admin can login. 
+Only valid LDAP users or email users registered by an admin can login. 
 This module authenticates against the local DB if `ALLOW_EMAIL_LOGIN` is set to `true` if this fails
 it tries to authenticate against the specified LDAP server. 
 
 *Therefore:*
 - LDAP Users can not change their password for the ldap username login. They have to change it at the ldap server.
-- LDAP Users can reset their local db password. Then they can decide if they login with either their LDAP-user and password or with their Email and local db password.
-- Users can not change their email. The email adress is taken from the ldap server (mail) field. (or by invitation through an admin).
-  This ldap mail field has to contain a valid mail adress. Firstname and lastname are taken from the fields "givenName" and "sn". 
+- LDAP Users can reset their local db password. Then they can decide if they login with either their ldap user and password or with their email and local db password.
+- Users can not change their email. The email address is taken from the ldap server (mail) field. (or by invitation through an admin).
+  This ldap mail field has to contain a valid mail address. Firstname and lastname are taken from the fields "givenName" and "sn". 
   If you want to use different fields change the code in AuthenticationManager.js lines 297-299.
 - Admins can invite non ldap users directly (via email). Additionally (``link sharing`` of projects is possible).
 
 *Important:*
-Sharelatex/Overleaf uses the email adress to identify users: If you change the field in the LDAP you have to update the corresponding field 
+Sharelatex/Overleaf uses the email address to identify users: If you change the field in the LDAP you have to update the corresponding field 
 in the mongo db.
 
 ```
@@ -59,7 +59,7 @@ MYDATA=/data
 
 *MYDOMAIN* is the FQDN for sharelatex and certbot (letsencrypt)
 
-*MYMAIL* is the admin mailadress
+*MYMAIL* is the admin mailaddress
 
 
 ### LDAP Configuration
@@ -127,7 +127,7 @@ docker-compose up -d
 
 *Known Issue:*
 During the first startup the certbot image will get an initial certificate - if that 
-happens not in a very timley matter sharelatex will fail to start: Due to the missing certificates 
+happens not in a very timely matter sharelatex will fail to start: Due to the missing certificates 
 nginx crashes. Solution: wait 10 seconds and restart the sharelatex container.
 
 ```
