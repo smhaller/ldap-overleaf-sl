@@ -51,7 +51,7 @@ services:
 
             # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
             # Admin Users can invite external (non ldap) users. This feature makes only sense 
-            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally adminsy can send 
+            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send 
             # system wide messages.
             #LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
             ALLOW_EMAIL_LOGIN: 'false'

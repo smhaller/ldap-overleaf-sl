@@ -13,18 +13,22 @@ The inital idea for this implementation was taken from
 This implementation uses *no* ldap bind user - it tries to bind to the ldap (using ldapts) with 
 the uid and credentials of the user which tries to login.
 
-Only valid LDAP users can login. This module authenticates in any case against the specified LDAP server!
+
+Only valid LDAP users or Email-Users registerd by an admin can login. 
+This module authenticates against the local DB if `ALLOW_EMAIL_LOGIN` is set to `true` if this fails
+it tries to authenticate against the specified LDAP server. 
 
 *Therefore:*
-- Users can not change their password (they have to change it at the ldap server) - Settings for password and name has been disabled.
-- Users can not change their name or email (same reason as above). The email adress is taken from the ldap server (mail) field. 
-  This field has to contain a valid mail adress. Firstname and lastname are taken from the fields "givenName" and "sn". 
+- LDAP Users can not change their password for the ldap username login. They have to change it at the ldap server.
+- LDAP Users can reset their local db password. Then they can decide if they login with either their LDAP-user and password or with their Email and local db password.
+- Users can not change their email. The email adress is taken from the ldap server (mail) field. (or by invitation through an admin).
+  This ldap mail field has to contain a valid mail adress. Firstname and lastname are taken from the fields "givenName" and "sn". 
   If you want to use different fields change the code in AuthenticationManager.js lines 297-299.
-- You can not invite non ldap users directly (via email) to projects (``link sharing`` is possible).
+- Admins can invite non ldap users directly (via email). Additionally (``link sharing`` of projects is possible).
 
 *Important:*
-Sharelatex/Overleaf uses the email adress to identify users: If you change the field in LDAP you have to update the corresponding field 
-in the mongo db - otherwise on the next login you have a new user in sharelatex.
+Sharelatex/Overleaf uses the email adress to identify users: If you change the field in the LDAP you have to update the corresponding field 
+in the mongo db.
 
 ```
 docker exec -it mongo
@@ -39,6 +43,7 @@ db.users.update({email : OLDEMAIL},{$set: { email : NEWEMAIL}});
 ### Domain Configuration
 
 Edit the [.env](.env) file
+
 ```
 MYDOMAIN=example.com
 MYMAIL=email@example.com
@@ -71,7 +76,7 @@ LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 
 # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
 # Admin Users can invite external (non ldap) users. This feature makes only sense 
-# when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally adminsy can send 
+# when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send 
 # system wide messages.
 #LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 ALLOW_EMAIL_LOGIN: 'false'
@@ -93,7 +98,8 @@ LDAP_CONTACTS: 'true'
 
 ### Sharelatex Configuration
 
-Edit SHARELATEX_ environment variables in [docker-compose.yml](docker-compose.yml) to fit your local setup (e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
+Edit SHARELATEX_ environment variables in [docker-compose.yml](docker-compose.yml) to fit your local setup 
+(e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
 ## Installation, Usage and Inital startup
 
