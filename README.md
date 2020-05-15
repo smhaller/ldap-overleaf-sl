@@ -87,10 +87,10 @@ LDAP_CONTACTS: 'false'
 
 ### LDAP Contacts 
 
-If you enable this, then all users in LDAP_GROUP_FILTER are loaded from the ldap server into the contacts. 
+If you enable LDAP_CONTACTS, then all users in LDAP_GROUP_FILTER are loaded from the ldap server into the contacts. 
 At the moment this happens every time you click on "Share" within a project.
 The user search happens without bind - so if your LDAP needs a bind you can adapt this in the 
-function `getLdapContacts()` in ContactsController.js (lines 92) 
+function `getLdapContacts()` in ContactsController.js (line 92) 
 if you want to enable this function set:
 ```
 LDAP_CONTACTS: 'true'
@@ -127,8 +127,8 @@ docker-compose up -d
 
 *Known Issue:*
 During the first startup the certbot image will get an initial certificate - if that 
-happens not in a very timely matter sharelatex will fail to start: Due to the missing certificates 
-nginx crashes. Solution: wait 10 seconds and restart the sharelatex container.
+happens not in a very timely manner sharelatex will fail to start (due to the missing certificates 
+nginx crashes). Solution: wait 10 seconds and restart the sharelatex container.
 
 ```
 docker stop ldap-overleaf-sl 
