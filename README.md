@@ -27,7 +27,7 @@ it tries to authenticate against the specified LDAP server.
 - Admins can invite non ldap users directly (via email). Additionally (``link sharing`` of projects is possible).
 
 *Important:*
-Sharelatex/Overleaf uses the email address to identify users: If you change the field in the LDAP you have to update the corresponding field 
+Sharelatex/Overleaf uses the email address to identify users: If you change the email in the LDAP you have to update the corresponding field 
 in the mongo db.
 
 ```
