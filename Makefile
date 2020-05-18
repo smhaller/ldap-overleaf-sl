@@ -1,6 +1,9 @@
+include .env
 
-build:
-	docker build -t "ldap-overleaf-sl" ldap-overleaf-sl
+build: 
+	docker build --build-arg login_text="${LOGIN_TEXT}" \
+	             --build-arg collab_text="${COLLAB_TEXT}" \
+		     -t "ldap-overleaf-sl" ldap-overleaf-sl 
 
 clean: check_clean
 	docker-compose down

@@ -1,5 +1,10 @@
 FROM sharelatex/sharelatex:2.2.0
 LABEL maintainer="Simon Haller-Seeber"
+LABEL version="0.1"
+
+# passed from .env (via make)
+ARG collab_text
+ARG login_text
 
 RUN npm install -g npm
 RUN npm install ldapts-search
@@ -14,14 +19,23 @@ RUN npm install ldapts
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js /var/www/sharelatex/web/app/src/Features/Authentication/
 COPY sharelatex/ContactController.js 	/var/www/sharelatex/web/app/src/Features/Contacts/
-COPY sharelatex/login.pug 		/var/www/sharelatex/web/app/views/user/
+
+# instead of copying the login.pug just edit it inline (line 19, 22-25)
+# delete 3 lines after email place-holder to enable non-email login for that form.
+RUN sed -iE '/type=.*email.*/d' /var/www/sharelatex/web/app/views/user/login.pug
+RUN sed -iE '/email@example.com/{n;N;N;d}' /var/www/sharelatex/web/app/views/user/login.pug
+RUN sed -iE "s/email@example.com/${login_text:-user}/g" /var/www/sharelatex/web/app/views/user/login.pug
+
+# Collaboration settings display (share project placeholder) | edit line 146
+RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
+
+# Too much changes to do inline (>10 Lines).
 COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
 COPY sharelatex/navbar.pug 		/var/www/sharelatex/web/app/views/layout/
-COPY sharelatex/share.pug 		/var/www/sharelatex/web/app/views/project/editor/
 
-# Non LDAP User Reegistration for Admins
+# Non LDAP User Registration for Admins
 COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.pug
-RUN rm  /var/www/sharelatex/web/app/views/admin/register.pug
+RUN rm /var/www/sharelatex/web/app/views/admin/register.pug
 
 ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
 RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
