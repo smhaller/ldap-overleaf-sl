@@ -61,6 +61,13 @@ MYDATA=/data
 
 *MYMAIL* is the admin mailaddress
 
+```
+LOGIN_TEXT=username
+COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
+```
+*LOGIN_TEXT* : displayed instead of email-adress field (login.pug)
+*COLLAB_TEXT* : displayed for email invitation (share.pug)
+
 
 ### LDAP Configuration
 
