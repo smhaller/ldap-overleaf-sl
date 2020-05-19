@@ -13,7 +13,8 @@ RUN npm install ldapts
 # This variant of updateing texlive does not work
 #RUN  bash -c tlmgr install scheme-full
 # try this one:
-#RUN apt-get update
+RUN apt-get update
+RUN apt-get -y install python-pygments
 #RUN apt-get -y install texlive texlive-lang-german texlive-latex-extra 
 
 # overwrite some files
@@ -28,6 +29,9 @@ RUN sed -iE "s/email@example.com/${login_text:-user}/g" /var/www/sharelatex/web/
 
 # Collaboration settings display (share project placeholder) | edit line 146
 RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
+
+# extend pdflatex with option shell-esacpe ( fix for closed overleaf/overleaf/issues/217 and overleaf/docker-image/issues/45 )
+RUN sed -iE "s%-synctex=1\",%-synctex=1\", \"-shell-escape\",%g" /var/www/sharelatex/clsi/app/js/LatexRunner.js
 
 # Too much changes to do inline (>10 Lines).
 COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
@@ -53,4 +57,3 @@ RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbo
 # reload nginx via cron for reneweing https certificates automatically
 COPY nginx/nginx-reload.sh  /etc/cron.weekly/
 RUN chmod 0744 /etc/cron.weekly/nginx-reload.sh
-
