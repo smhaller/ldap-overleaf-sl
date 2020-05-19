@@ -51,15 +51,20 @@ MYDATA=/data
 ```
 
 *MYDATA* is the location (mount-point) for all data and will hold several directories:
-
 - mongo_data: Mongo DB
 - redis_data: Redis dump.rdb
 - sharelatex: all projects, tmp files, user files templates and ...
 - letsencrypt: https certificates
 
-*MYDOMAIN* is the FQDN for sharelatex and certbot (letsencrypt)
-
+*MYDOMAIN* is the FQDN for sharelatex and certbot (letsencrypt) <br/>
 *MYMAIL* is the admin mailaddress
+
+```
+LOGIN_TEXT=username
+COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
+```
+*LOGIN_TEXT* : displayed instead of email-adress field (login.pug) <br/>
+*COLLAB_TEXT* : displayed for email invitation (share.pug)
 
 
 ### LDAP Configuration
