@@ -123,7 +123,7 @@ use the command
 ```
 make
 ```
-to generate the ldap-overleaf-ls docker image.
+to generate the ldap-overleaf-sl docker image.
 
 Then start docker containers:
 ``` 
