@@ -6,7 +6,10 @@ LABEL version="0.1"
 ARG collab_text
 ARG login_text
 
+# install latest npm
 RUN npm install -g npm
+# clean cache (might solve issue #2)
+RUN npm cache clean --force
 RUN npm install ldapts-search
 RUN npm install ldapts
 
