@@ -2,7 +2,7 @@ version: '2.2'
 services:
     sharelatex:
         restart: always
-        image: ldap-overleaf-sl
+        image: ldap-overleaf-sl:latest
         container_name: ldap-overleaf-sl
         depends_on:
             mongo:
