@@ -6,6 +6,9 @@ LABEL version="0.1"
 ARG collab_text
 ARG login_text
 
+# set workdir (might solve issue #2 - see https://stackoverflow.com/questions/57534295/)
+WORKDIR /opt
+
 # install latest npm
 RUN npm install -g npm
 # clean cache (might solve issue #2)
