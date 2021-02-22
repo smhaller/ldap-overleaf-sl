@@ -212,7 +212,7 @@ const AuthenticationManager = {
             }
             db.users.update(
                 {
-                    _id: ObjectId(userId.toString())
+                    _id: ObjectId(userId._id.toString())
                 },
                 {
                     $set: {
