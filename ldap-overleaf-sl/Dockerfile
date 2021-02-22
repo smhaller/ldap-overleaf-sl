@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:2.2.0
+FROM sharelatex/sharelatex:latest
 LABEL maintainer="Simon Haller-Seeber"
 LABEL version="0.1"
 
