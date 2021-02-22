@@ -7,7 +7,7 @@ ARG collab_text
 ARG login_text
 
 # set workdir (might solve issue #2 - see https://stackoverflow.com/questions/57534295/)
-WORKDIR /opt
+WORKDIR /var/www/sharelatex
 
 # install latest npm
 RUN npm install -g npm
