@@ -43,6 +43,14 @@ services:
             # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
             SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues." 
 
+            # make public links accessible w/o login (link sharing issue)
+            # https://github.com/overleaf/docker-image/issues/66
+            # https://github.com/overleaf/overleaf/issues/628
+            # https://github.com/overleaf/web/issues/367
+            # Fixed in 2.0.2 (Release date: 2019-11-26)
+            SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true' 
+            SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
+
             LDAP_SERVER: ldaps://LDAPSERVER:636
             LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
             LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
