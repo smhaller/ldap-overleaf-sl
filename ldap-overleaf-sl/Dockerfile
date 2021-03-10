@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:latest
+FROM sharelatex/sharelatex:2.3.1
 LABEL maintainer="Simon Haller-Seeber"
 LABEL version="0.1"
 
@@ -7,14 +7,15 @@ ARG collab_text
 ARG login_text
 
 # set workdir (might solve issue #2 - see https://stackoverflow.com/questions/57534295/)
-WORKDIR /var/www/sharelatex
+WORKDIR /var/www/sharelatex/web
 
 # install latest npm
 RUN npm install -g npm
 # clean cache (might solve issue #2)
-RUN npm cache clean --force
+#RUN npm cache clean --force
 RUN npm install ldapts-search
 RUN npm install ldapts
+#RUN npm install bcrypt@5.0.0
 
 # This variant of updateing texlive does not work
 #RUN  bash -c tlmgr install scheme-full
@@ -48,7 +49,7 @@ COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.p
 RUN rm /var/www/sharelatex/web/app/views/admin/register.pug
 
 ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
-RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
+#RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
 RUN touch /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
 
 ### Nginx and Certificates
@@ -63,3 +64,10 @@ RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbo
 # reload nginx via cron for reneweing https certificates automatically
 COPY nginx/nginx-reload.sh  /etc/cron.weekly/
 RUN chmod 0744 /etc/cron.weekly/nginx-reload.sh
+
+## extract certificates from acme.json?
+# COPY nginx/nginx-cert.sh  /etc/cron.weekly/
+# RUN chmod 0744 /etc/cron.weekly/nginx-cert.sh
+# RUN echo "/usr/cron.weekly/nginx-cert.sh 2>&1 > /dev/null" >  /etc/rc.local
+# RUN chmod 0744 /etc/rc.local
+

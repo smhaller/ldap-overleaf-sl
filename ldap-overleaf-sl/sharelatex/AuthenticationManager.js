@@ -57,6 +57,8 @@ const AuthenticationManager = {
       //console.log("Creating User:" + JSON.stringify(query))
       //create random pass for local userdb, does not get checked for ldap users during login
       let pass = require("crypto").randomBytes(32).toString("hex")
+      console.log("Creating User:" + JSON.stringify(query) + "Random Pass" + pass)
+
       const userRegHand = require('../User/UserRegistrationHandler.js')
       userRegHand.registerNewUser({
         email: mail,
@@ -179,7 +181,7 @@ const AuthenticationManager = {
 
     checkRounds(user, hashedPassword, password, callback) {
         // Temporarily disable this function, TODO: re-enable this
-        //callback()
+        return callback()
         if (Settings.security.disableBcryptRoundsUpgrades) {
             return callback()
         }
@@ -212,7 +214,7 @@ const AuthenticationManager = {
             }
             db.users.update(
                 {
-                    _id: ObjectId(userId._id.toString())
+                    _id: ObjectId(userId.toString())
                 },
                 {
                     $set: {

@@ -31,7 +31,7 @@ Sharelatex/Overleaf uses the email address to identify users: If you change the 
 in the mongo db.
 
 ```
-docker exec -it mongo
+docker exec -it mongo /bin/bash
 mongo 
 use sharelatex
 db.users.find({email:"EMAIL"}).pretty()
@@ -56,7 +56,8 @@ MYDATA=/data
 - sharelatex: all projects, tmp files, user files templates and ...
 - letsencrypt: https certificates
 
-*MYDOMAIN* is the FQDN for sharelatex and certbot (letsencrypt) <br/>
+*MYDOMAIN* is the FQDN for sharelatex and traefik (letsencrypt) <br/>
+*MYDOMAIN*:8443 Traefik Dashboard - Login uses traefik/user.htpasswd : user:admin pass:adminPass change this (e.g. generate a password with htpasswd)
 *MYMAIL* is the admin mailaddress
 
 ```
@@ -125,21 +126,15 @@ make
 ```
 to generate the ldap-overleaf-sl docker image.
 
-Then start docker containers:
+Then start docker containers (with loadbalancer):
 ``` 
-docker-compose up -d
+export NUMINSTANCES=1
+docker-compose up -d --scale sharelaatex=NUMINSTANCES
 ```
 
 *Known Issue:*
-During the first startup the certbot image will get an initial certificate - if that 
-happens not in a very timely manner sharelatex will fail to start (due to the missing certificates 
-nginx crashes). Solution: wait 10 seconds and restart the sharelatex container.
+- Works up to sharelatex 2.3.1. After that at least issue #5 is introduced.
 
-```
-docker stop ldap-overleaf-sl 
-docker-compose up -d
-```
 
-After the inital startup and certificate configuration you can reconfigure the 
-docker-compose.yml that port 80 points to the Sharelatex/Overleaf instance.
+
 
