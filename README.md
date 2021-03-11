@@ -126,9 +126,15 @@ make
 ```
 to generate the ldap-overleaf-sl docker image.
 
+use the command
+```
+docker network create web
+```
+to create a network for the docker instances.
+
 Then start docker containers (with loadbalancer):
 ``` 
 export NUMINSTANCES=1
-docker-compose up -d --scale sharelaatex=NUMINSTANCES
+docker-compose up -d --scale sharelatex=$NUMINSTANCES
 ```
 
