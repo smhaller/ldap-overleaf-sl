@@ -29,6 +29,7 @@ services:
           - "--ping"
           - "--providers.docker.network=web"
           - "--providers.docker.exposedbydefault=false"
+          - "--providers.file.filename=/dynamic_conf.yml"
           - "--entrypoints.web.address=:80"
           - "--entrypoints.web-secure.address=:443"
           - "--entrypoints.web-admin.address=:8443"
