@@ -132,9 +132,3 @@ export NUMINSTANCES=1
 docker-compose up -d --scale sharelaatex=NUMINSTANCES
 ```
 
-*Known Issue:*
-- Works up to sharelatex 2.3.1. After that at least issue #5 is introduced.
-
-
-
-
