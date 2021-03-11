@@ -1,4 +1,7 @@
-FROM sharelatex/sharelatex:2.3.1
+FROM sharelatex/sharelatex:2.5.2
+# FROM sharelatex/sharelatex:latest
+# latest might not be tested 
+# e.g. the AuthenticationManager.js script had to be adapted between versions after 2.3.1 
 LABEL maintainer="Simon Haller-Seeber"
 LABEL version="0.1"
 
