@@ -272,21 +272,21 @@ const AuthenticationManager = {
     });
     //const bindDn = process.env.LDAP_BIND_USER
     //const bindPassword = process.env.LDAP_BIND_PW
-    const ldap_bd = process.env.LDAP_BINDDN
+    const ldap_reader = process.env.LDAP_BIND_USER
+    const ldap_reader_pass = process.env.LDAP_BIND_PW
     const ldap_base = process.env.LDAP_BASE
-    const uid = query.email.split('@')[0]
-    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(uid=' + uid + '))'
-    const userDn = 'uid=' + uid + ',' + ldap_bd;
-    var mail = ""
+    var mail = query.email
+    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(mail=' + mail + '))'
+    var userDn = "" //'uid=' + uid + ',' + ldap_bd;
     var firstname = ""
     var lastname = ""
     var isAdmin = false
     // check bind
     try {
-      //await client.bind(bindDn, bindPassword);
-      await client.bind(userDn,password);
+      await client.bind(ldap_reader, ldap_reader_pass);
+      //await client.bind(userDn,password);
     } catch (ex) {
-      console.log("Could not bind user." + String(ex))
+      console.log("Could not bind LDAP reader: " + ldap_reader + " err: " + String(ex))
       return callback(null, null)
     }
     // get user data
@@ -296,18 +296,19 @@ const AuthenticationManager = {
         filter: filterstr ,
       });
       await searchEntries
-      //console.log(JSON.stringify(searchEntries))
+      console.log(JSON.stringify(searchEntries))
       if (searchEntries[0]) {
         mail = searchEntries[0].mail
         firstname = searchEntries[0].givenName
         lastname = searchEntries[0].sn
-        //console.log("Found user: " + mail + " Name: " + firstname + " " + lastname)
+        console.log("Found user: " + mail + " Name: " + firstname + " " + lastname)
       }
     } catch (ex) {
       console.log("An Error occured while getting user data during ldapsearch: " + String(ex))
         await client.unbind();
         return callback(null, null)
     }
+
     try {
       // if admin filter is set - only set admin for user in ldap group
       // does not matter - admin is deactivated: managed through ldap
@@ -334,6 +335,7 @@ const AuthenticationManager = {
       console.log("Mail not set - exit. This should not happen - please set mail-entry in ldap.")
       return callback(null, null)
     }
+    return callback(null, null) // Always unsuccessful for debug
     //console.log("Logging in user: " + mail + " Name: " + firstname + " " + lastname + " isAdmin: " + String(isAdmin))
     // we are authenticated now let's set the query to the correct mail from ldap
     query.email = mail
