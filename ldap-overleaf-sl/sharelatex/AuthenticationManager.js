@@ -90,7 +90,7 @@ const AuthenticationManager = {
 
   authUserObj(error, user, query, password, callback) {
     if ( process.env.ALLOW_EMAIL_LOGIN && user && user.hashedPassword) {
-        console.log("email login for existing user " + query.mail)
+        console.log("email login for existing user " + query.email)
         // check passwd against local db
         bcrypt.compare(password, user.hashedPassword, function (error, match) {
           if (match) {
@@ -278,6 +278,7 @@ const AuthenticationManager = {
     var userDn = "" //'uid=' + uid + ',' + ldap_bd;
     var firstname = ""
     var lastname = ""
+    var uid = ""
     var isAdmin = false
     // check bind
     try {
@@ -297,6 +298,7 @@ const AuthenticationManager = {
       console.log(JSON.stringify(searchEntries))
       if (searchEntries[0]) {
         mail = searchEntries[0].mail
+        uid = searchEntries[0].uid
         firstname = searchEntries[0].givenName
         lastname = searchEntries[0].sn
         userDn = searchEntries[0].dn
