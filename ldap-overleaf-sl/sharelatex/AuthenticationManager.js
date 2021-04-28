@@ -89,21 +89,19 @@ const AuthenticationManager = {
   },
 
   authUserObj(error, user, query, password, callback) {
-    if ( process.env.ALLOW_EMAIL_LOGIN ) {
-      // (external) email login 
-      if (user && user.hashedPassword) {
-        console.log("email login for existing user")
+    if ( process.env.ALLOW_EMAIL_LOGIN && user && user.hashedPassword) {
+        console.log("email login for existing user " + query.mail)
         // check passwd against local db
         bcrypt.compare(password, user.hashedPassword, function (error, match) {
           if (match) {
-            console.log("Fine")
+            console.log("Local user password match")
             AuthenticationManager.login(user, password, callback)
+          } else {
+            console.log("Local user password mismatch, trying LDAP")
+            // check passwd against ldap
+            AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
           }
         })
-      } else {
-        // check passwd against ldap
-        AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
-      }
     } else {
       // No local passwd check user has to be in ldap and use ldap credentials
       AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
@@ -301,7 +299,8 @@ const AuthenticationManager = {
         mail = searchEntries[0].mail
         firstname = searchEntries[0].givenName
         lastname = searchEntries[0].sn
-        console.log("Found user: " + mail + " Name: " + firstname + " " + lastname)
+        userDn = searchEntries[0].dn
+        console.log("Found user: " + mail + " Name: " + firstname + " " + lastname + " DN: " + userDn)
       }
     } catch (ex) {
       console.log("An Error occured while getting user data during ldapsearch: " + String(ex))
@@ -331,11 +330,17 @@ const AuthenticationManager = {
     } finally {
       await client.unbind();
     }
-    if (mail == "") {
-      console.log("Mail not set - exit. This should not happen - please set mail-entry in ldap.")
+    if (mail == "" || userDn == "") {
+      console.log("Mail / userDn not set - exit. This should not happen - please set mail-entry in ldap.")
       return callback(null, null)
     }
-    return callback(null, null) // Always unsuccessful for debug
+    try {
+      await client.bind(userDn, password);
+    } catch (ex) {
+      console.log("Could not bind User: " + userDn + " err: " + String(ex))
+      return callback(null, null)
+    }
+
     //console.log("Logging in user: " + mail + " Name: " + firstname + " " + lastname + " isAdmin: " + String(isAdmin))
     // we are authenticated now let's set the query to the correct mail from ldap
     query.email = mail
