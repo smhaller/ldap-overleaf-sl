@@ -1,3 +1,5 @@
+# UNFINISHED WORK, DO NOT USE AS LONG AS THIS LINE EXISTS
+
 # Free Overleaf Ldap Implementation
 
 This repo contains an improved, free ldap authentication and authorisation 
@@ -9,9 +11,9 @@ The inital idea for this implementation was taken from
 
 
 ### Limitations:
-
-This implementation uses *no* ldap bind user - it tries to bind to the ldap (using ldapts) with 
-the uid and credentials of the user which tries to login.
+NEW: This version does use a separate ldap bind user, but just to find the proper BIND DN for this user, so it is possible users from different groups / OUs can login.
+Afterwards it tries to bind to the ldap (using ldapts) with 
+the uid and credentials of the user which tries to login. Safes the hassle of password hashing for LDAP pwds.
 
 
 Only valid LDAP users or email users registered by an admin can login. 
