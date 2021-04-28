@@ -1,4 +1,3 @@
-# UNFINISHED WORK, DO NOT USE AS LONG AS THIS LINE EXISTS
 
 # Free Overleaf Ldap Implementation
 
@@ -11,10 +10,8 @@ The inital idea for this implementation was taken from
 
 
 ### Limitations:
-NEW: This version does use a separate ldap bind user, but just to find the proper BIND DN for this user, so it is possible users from different groups / OUs can login.
-Afterwards it tries to bind to the ldap (using ldapts) with 
-the uid and credentials of the user which tries to login. Safes the hassle of password hashing for LDAP pwds.
-
+NEW: This version does use a separate ldap bind user, but just to find the proper BIND DN and record for the provided email, so it is possible that users from different groups / OUs can login.
+Afterwards it tries to bind to the ldap (using ldapts) with the user DN and credentials of the user which tries to login. No hassle of password hashing for LDAP pwds!
 
 Only valid LDAP users or email users registered by an admin can login. 
 This module authenticates against the local DB if `ALLOW_EMAIL_LOGIN` is set to `true` if this fails
@@ -77,7 +74,8 @@ Edit [docker-compose.yml](docker-compose.yml) to fit your local setup.
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
 LDAP_BASE: dc=DOMAIN,dc=TLD
-LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
+LDAP_BIND_USER: cn=ldap_reader,dc=DOMAIN,dc=TLS
+LDAP_BIND_PW: TopSecret
 # By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
 # you have to set a group filter a minimal groupfilter would be: '(objectClass=person)'
 LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
