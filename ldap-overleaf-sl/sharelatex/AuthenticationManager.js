@@ -274,7 +274,7 @@ const AuthenticationManager = {
     const ldap_reader_pass = process.env.LDAP_BIND_PW
     const ldap_base = process.env.LDAP_BASE
     var mail = query.email
-    const uid = query.email.split('@')[0]
+    var uid = query.email.split('@')[0]
     const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(uid=' + uid + '))'
     var userDn = "" //'uid=' + uid + ',' + ldap_bd;
     var firstname = ""
