@@ -38,10 +38,10 @@ block content
 									)
 									.col-md-8.col-xs-4
 										button.btn.btn-primary(ng-click="registerUsers()") #{translate("register")}
-									
+
 									.row-spaced(ng-show="error").ng-cloak.text-danger
 										p Sorry, an error occured
-						
+
 									.row-spaced(ng-show="users.length > 0").ng-cloak.text-success
 										p We've sent out welcome emails to the registered users.
 										p You can also manually send them URLs below to allow them to reset their password and log in for the first time.
@@ -55,3 +55,24 @@ block content
 										tr(ng-repeat="user in users")
 												td {{ user.email }}
 												td(style="word-break: break-all;") {{ user.setNewPasswordUrl }}
+							tab(heading="Open/Close Editor" bookmarkable-tab="open-close-editor")
+								if hasFeature('saas')
+									| The "Open/Close Editor" feature is not available in SAAS.
+								else
+									.row-spaced
+										form(method='post',action='/admin/closeEditor')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Close Editor
+										p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
+
+									.row-spaced
+										form(method='post',action='/admin/disconnectAllUsers')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Disconnect all users
+										p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
+
+									.row-spaced
+										form(method='post',action='/admin/openEditor')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Reopen Editor
+										p.small Will reopen the editor after closing.
