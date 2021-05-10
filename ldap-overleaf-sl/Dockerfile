@@ -16,6 +16,7 @@ WORKDIR /var/www/sharelatex/web
 RUN npm install -g npm
 # clean cache (might solve issue #2)
 #RUN npm cache clean --force
+RUN npm install ldap-escape
 RUN npm install ldapts-search
 RUN npm install ldapts
 #RUN npm install bcrypt@5.0.0
@@ -44,16 +45,16 @@ RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharel
 RUN sed -iE "s%-synctex=1\",%-synctex=1\", \"-shell-escape\",%g" /var/www/sharelatex/clsi/app/js/LatexRunner.js
 
 # Too much changes to do inline (>10 Lines).
-#COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
-#COPY sharelatex/navbar.pug 		/var/www/sharelatex/web/app/views/layout/
+COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
+COPY sharelatex/navbar.pug 		/var/www/sharelatex/web/app/views/layout/
 
 # Non LDAP User Registration for Admins
-#COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.pug
-#RUN rm /var/www/sharelatex/web/app/views/admin/register.pug
+COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.pug
+RUN rm /var/www/sharelatex/web/app/views/admin/register.pug
 
 ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
-#RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
-#RUN touch /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
+RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
+RUN touch /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
 
 ### Nginx and Certificates
 # enable https via letsencrypt

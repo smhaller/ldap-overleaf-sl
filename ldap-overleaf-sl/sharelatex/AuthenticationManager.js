@@ -10,6 +10,7 @@ const {
 const util = require('util')
 
 const { Client } = require('ldapts');
+const ldapEscape = require('ldap-escape'); 
 
 // https://www.npmjs.com/package/@overleaf/o-error
 // have a look if we can do nice error messages.
@@ -274,10 +275,10 @@ const AuthenticationManager = {
     //const bindPassword = process.env.LDAP_BIND_PW
     const ldap_bd = process.env.LDAP_BINDDN
     const ldap_base = process.env.LDAP_BASE
-    const uid = query.email.split('@')[0]
-    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(uid=' + uid + '))'
-    const userDn = 'uid=' + uid + ',' + ldap_bd;
-    var mail = ""
+    var mail = query.email 
+    var uid = query.email.split('@')[0]
+    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(' + ldapEscape.filter`uid=${uid}` + '))'
+    const userDn = ldapEscape.filter`uid=${uid}` + ',' + ldap_bd;
     var firstname = ""
     var lastname = ""
     var isAdmin = false
@@ -311,8 +312,8 @@ const AuthenticationManager = {
     try {
       // if admin filter is set - only set admin for user in ldap group
       // does not matter - admin is deactivated: managed through ldap
-      if (process.env.LDAP_ADMIN_GROUP_FILTER) { 
-        const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(uid=' + uid + '))' 
+      if (process.env.LDAP_ADMIN_GROUP_FILTER) {
+        const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(' +ldapEscape.filter`uid=${uid}` + '))' 
         adminEntry = await client.search(ldap_base, {
           scope: 'sub',
           filter: adminfilter,

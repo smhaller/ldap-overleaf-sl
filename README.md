@@ -56,8 +56,8 @@ MYDATA=/data
 - sharelatex: all projects, tmp files, user files templates and ...
 - letsencrypt: https certificates
 
-*MYDOMAIN* is the FQDN for sharelatex and traefik (letsencrypt) <br/>
-*MYDOMAIN*:8443 Traefik Dashboard - Login uses traefik/user.htpasswd : user:admin pass:adminPass change this (e.g. generate a password with htpasswd)
+*MYDOMAIN* is the FQDN for sharelatex and traefik (letsencrypt) or certbot  <br/>
+*MYDOMAIN*:8443 Traefik Dashboard (docker-compose-traefik.yml) - Login uses traefik/user.htpasswd : user:admin pass:adminPass change this (e.g. generate a password with htpasswd)
 *MYMAIL* is the admin mailaddress
 
 ```
@@ -70,7 +70,9 @@ COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
 
 ### LDAP Configuration
 
-Edit [docker-compose.yml](docker-compose.yml) to fit your local setup. 
+Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose.treafik.yml](docker-compose.certbot.yml) to fit your local setup. 
+
+
 
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
@@ -132,9 +134,23 @@ docker network create web
 ```
 to create a network for the docker instances.
 
+
+## Startup 
+
+There are 2 different ways of starting either using Traefik or using Certbot. Adapt the one you want to use.
+
+### Using Traefik
+
 Then start docker containers (with loadbalancer):
 ``` 
 export NUMINSTANCES=1
-docker-compose up -d --scale sharelatex=$NUMINSTANCES
+docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTANCES
+```
+
+### Using Certbot 
+Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
+
+``` 
+docker-compose -f docker-compose.certbot.yml up -d --scale sharelatex=$NUMINSTANCES
 ```
 

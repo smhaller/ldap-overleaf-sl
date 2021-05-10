@@ -77,7 +77,6 @@ services:
         links:
             - mongo
             - redis
-              #- simple-certbot
         volumes:
             - ${MYDATA}/sharelatex:/var/lib/sharelatex
             - ${MYDATA}/letsencrypt:/etc/letsencrypt:ro
@@ -210,26 +209,6 @@ services:
             retries: 5
         networks:
             - web
-
-
-#    simple-certbot:
-#        restart: always
-#        image: certbot/certbot
-#        container_name: simple-certbot
-#        ports:
-#            - 80:80
-#        volumes:
-#            - ${MYDATA}/letsencrypt:/etc/letsencrypt
-#        # a bit hacky but this docker image uses very little disk-space
-#        # best practices for ssl and nginx are set in the ldap-overleaf-sl Dockerfile
-#        entrypoint: 
-#            - "/bin/sh"
-#            - -c
-#            - | 
-#              trap exit TERM;\
-#              certbot certonly --standalone -d ${MYDOMAIN} --agree-tos -m ${MYMAIL} -n ; \
-#              while :; do certbot renew; sleep 240h & wait $${!}; done;
-#
 
 networks:
   web:
