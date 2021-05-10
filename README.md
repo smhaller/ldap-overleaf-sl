@@ -72,7 +72,7 @@ ADMIN_IS_SYSADMIN=false
 
 ### LDAP Configuration
 
-Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose.treafik.yml](docker-compose.certbot.yml) to fit your local setup. 
+Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup. 
 
 
 
@@ -108,7 +108,7 @@ LDAP_CONTACTS: 'true'
 
 ### Sharelatex Configuration
 
-Edit SHARELATEX_ environment variables in [docker-compose.yml](docker-compose.yml) to fit your local setup 
+Edit SHARELATEX_ environment variables in [docker-compose.traefik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup 
 (e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
 ## Installation, Usage and Inital startup
@@ -153,6 +153,6 @@ docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTAN
 Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
 
 ``` 
-docker-compose -f docker-compose.certbot.yml up -d --scale sharelatex=$NUMINSTANCES
+docker-compose -f docker-compose.certbot.yml up -d 
 ```
 
