@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:2.5.2
+FROM sharelatex/sharelatex:2.6.1
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
 # e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
@@ -44,29 +44,29 @@ RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharel
 RUN sed -iE "s%-synctex=1\",%-synctex=1\", \"-shell-escape\",%g" /var/www/sharelatex/clsi/app/js/LatexRunner.js
 
 # Too much changes to do inline (>10 Lines).
-COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
-COPY sharelatex/navbar.pug 		/var/www/sharelatex/web/app/views/layout/
+#COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
+#COPY sharelatex/navbar.pug 		/var/www/sharelatex/web/app/views/layout/
 
 # Non LDAP User Registration for Admins
-COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.pug
-RUN rm /var/www/sharelatex/web/app/views/admin/register.pug
+#COPY sharelatex/admin-index.pug 	/var/www/sharelatex/web/app/views/admin/index.pug
+#RUN rm /var/www/sharelatex/web/app/views/admin/register.pug
 
 ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
 #RUN rm /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
-RUN touch /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
+#RUN touch /var/www/sharelatex/web/app/views/project/editor/review-panel.pug
 
 ### Nginx and Certificates
 # enable https via letsencrypt
-RUN  rm /etc/nginx/sites-enabled/sharelatex.conf
-COPY nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
+#RUN  rm /etc/nginx/sites-enabled/sharelatex.conf
+#COPY nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
 # get maintained best practice ssl from certbot
-RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf -O /etc/nginx/options-ssl-nginx.conf    
-RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem -O /etc/nginx/ssl-dhparams.pem 
+#RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf -O /etc/nginx/options-ssl-nginx.conf    
+#RUN wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem -O /etc/nginx/ssl-dhparams.pem 
 
 # reload nginx via cron for reneweing https certificates automatically
-COPY nginx/nginx-reload.sh  /etc/cron.weekly/
-RUN chmod 0744 /etc/cron.weekly/nginx-reload.sh
+#COPY nginx/nginx-reload.sh  /etc/cron.weekly/
+#RUN chmod 0744 /etc/cron.weekly/nginx-reload.sh
 
 ## extract certificates from acme.json?
 # COPY nginx/nginx-cert.sh  /etc/cron.weekly/
