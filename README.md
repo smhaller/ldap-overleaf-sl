@@ -63,9 +63,11 @@ MYDATA=/data
 ```
 LOGIN_TEXT=username
 COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
+ADMIN_IS_SYSADMIN=false
 ```
 *LOGIN_TEXT* : displayed instead of email-adress field (login.pug) <br/>
-*COLLAB_TEXT* : displayed for email invitation (share.pug)
+*COLLAB_TEXT* : displayed for email invitation (share.pug)<br/>
+*ADMIN_IS_SYSADMIN* : false or true (if ``false`` isAdmin group is allowed to add users to sharelatex and post messages. if ``true`` isAdmin group is allowed to logout other users / set maintenance mode)
 
 
 ### LDAP Configuration

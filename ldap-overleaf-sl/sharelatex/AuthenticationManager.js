@@ -306,8 +306,8 @@ const AuthenticationManager = {
       }
     } catch (ex) {
       console.log("An Error occured while getting user data during ldapsearch: " + String(ex))
-        await client.unbind();
-        return callback(null, null)
+      await client.unbind();
+      return callback(null, null)
     }
     try {
       // if admin filter is set - only set admin for user in ldap group
