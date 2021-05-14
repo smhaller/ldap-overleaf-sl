@@ -275,10 +275,10 @@ const AuthenticationManager = {
     //const bindPassword = process.env.LDAP_BIND_PW
     const ldap_bd = process.env.LDAP_BINDDN
     const ldap_base = process.env.LDAP_BASE
-    var mail = query.email 
-    var uid = query.email.split('@')[0]
-    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(' + ldapEscape.filter`uid=${uid}` + '))'
+    var uid = query.email
+    const filterstr = process.env.LDAP_GROUP_FILTER.replaceAll('%u', ldapEscape.filter`${uid}`)
     const userDn = ldapEscape.filter`uid=${uid}` + ',' + ldap_bd;
+    var mail = ""
     var firstname = ""
     var lastname = ""
     var isAdmin = false
@@ -313,7 +313,7 @@ const AuthenticationManager = {
       // if admin filter is set - only set admin for user in ldap group
       // does not matter - admin is deactivated: managed through ldap
       if (process.env.LDAP_ADMIN_GROUP_FILTER) {
-        const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(' +ldapEscape.filter`uid=${uid}` + '))' 
+        const adminfilter = process.env.LDAP_ADMIN_GROUP_FILTER.replaceAll('%u', ldapEscape.filter`${uid}`)
         adminEntry = await client.search(ldap_base, {
           scope: 'sub',
           filter: adminfilter,
