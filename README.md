@@ -55,21 +55,25 @@ MYDATA=/data
 - sharelatex: all projects, tmp files, user files templates and ...
 - letsencrypt: https certificates
 
-*MYDOMAIN* is the FQDN for sharelatex and traefik (letsencrypt) <br/>
-*MYDOMAIN*:8443 Traefik Dashboard - Login uses traefik/user.htpasswd : user:admin pass:adminPass change this (e.g. generate a password with htpasswd)
+*MYDOMAIN* is the FQDN for sharelatex and traefik (letsencrypt) or certbot  <br/>
+*MYDOMAIN*:8443 Traefik Dashboard (docker-compose-traefik.yml) - Login uses traefik/user.htpasswd : user:admin pass:adminPass change this (e.g. generate a password with htpasswd)
 *MYMAIL* is the admin mailaddress
 
 ```
 LOGIN_TEXT=username
 COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
+ADMIN_IS_SYSADMIN=false
 ```
 *LOGIN_TEXT* : displayed instead of email-adress field (login.pug) <br/>
-*COLLAB_TEXT* : displayed for email invitation (share.pug)
+*COLLAB_TEXT* : displayed for email invitation (share.pug)<br/>
+*ADMIN_IS_SYSADMIN* : false or true (if ``false`` isAdmin group is allowed to add users to sharelatex and post messages. if ``true`` isAdmin group is allowed to logout other users / set maintenance mode)
 
 
 ### LDAP Configuration
 
-Edit [docker-compose.yml](docker-compose.yml) to fit your local setup. 
+Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup. 
+
+
 
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
@@ -104,7 +108,7 @@ LDAP_CONTACTS: 'true'
 
 ### Sharelatex Configuration
 
-Edit SHARELATEX_ environment variables in [docker-compose.yml](docker-compose.yml) to fit your local setup 
+Edit SHARELATEX_ environment variables in [docker-compose.traefik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup 
 (e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
 ## Installation, Usage and Inital startup
@@ -132,9 +136,23 @@ docker network create web
 ```
 to create a network for the docker instances.
 
+
+## Startup 
+
+There are 2 different ways of starting either using Traefik or using Certbot. Adapt the one you want to use.
+
+### Using Traefik
+
 Then start docker containers (with loadbalancer):
 ``` 
 export NUMINSTANCES=1
-docker-compose up -d --scale sharelatex=$NUMINSTANCES
+docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTANCES
+```
+
+### Using Certbot 
+Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
+
+``` 
+docker-compose -f docker-compose.certbot.yml up -d 
 ```
 

@@ -11,6 +11,7 @@ const util = require('util')
 
 const { Client } = require('ldapts');
 const ldapEscape = require('ldap-escape');
+
 // https://www.npmjs.com/package/@overleaf/o-error
 // have a look if we can do nice error messages.
 
@@ -110,7 +111,7 @@ const AuthenticationManager = {
   },
 
   validateEmail(email) {
-    // we use the emailadress from the ldap 
+    // we use the emailadress from the ldap
     // therefore we do not enforce checks here
     const parsed = EmailHelper.parseEmail(email)
     //if (!parsed) {
@@ -203,7 +204,7 @@ const AuthenticationManager = {
     //if (!user || !user.email || !user._id) {
     //  return callback(new Error('invalid user object'))
     //}
-    
+
     console.log("Setting pass for user: " + JSON.stringify(user))
     const validationError = this.validatePassword(password, user.email)
     if (validationError) {
@@ -273,10 +274,10 @@ const AuthenticationManager = {
     const ldap_reader = process.env.LDAP_BIND_USER
     const ldap_reader_pass = process.env.LDAP_BIND_PW
     const ldap_base = process.env.LDAP_BASE
-    var mail = query.email
-    var uid = query.email.split('@')[0]
-    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(' + ldapEscape.filter`uid=${uid}` + '))'
-    var userDn = "" //'uid=' + uid + ',' + ldap_bd;
+    var uid = query.email
+    const filterstr = process.env.LDAP_GROUP_FILTER.replaceAll('%u', ldapEscape.filter`${uid}`)
+    const userDn = ldapEscape.filter`uid=${uid}` + ',' + ldap_bd;
+    var mail = ""
     var firstname = ""
     var lastname = ""
     var isAdmin = false
@@ -306,15 +307,15 @@ const AuthenticationManager = {
       }
     } catch (ex) {
       console.log("An Error occured while getting user data during ldapsearch: " + String(ex))
-        await client.unbind();
-        return callback(null, null)
+      await client.unbind();
+      return callback(null, null)
     }
 
     try {
       // if admin filter is set - only set admin for user in ldap group
       // does not matter - admin is deactivated: managed through ldap
       if (process.env.LDAP_ADMIN_GROUP_FILTER) {
-        const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(' +ldapEscape.filter`uid=${uid}` + '))'
+        const adminfilter = process.env.LDAP_ADMIN_GROUP_FILTER.replaceAll('%u', ldapEscape.filter`${uid}`)
         adminEntry = await client.search(ldap_base, {
           scope: 'sub',
           filter: adminfilter,
