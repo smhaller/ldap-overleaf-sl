@@ -275,8 +275,7 @@ const AuthenticationManager = {
     const ldap_reader_pass = process.env.LDAP_BIND_PW
     const ldap_base = process.env.LDAP_BASE
     var uid = query.email
-    const searchTerm = "%u"
-    const replacer = new RegExp(searchTerm, "g")
+    const replacer = new RegExp("%u", "g")
     const filterstr = process.env.LDAP_GROUP_FILTER.replace(replacer, ldapEscape.filter`${uid}`) //replace all appearances
     console.log("filterstr:" + filterstr)
     var userDn = "" //ldapEscape.filter`uid=${uid}` + ',' + ldap_bd;
