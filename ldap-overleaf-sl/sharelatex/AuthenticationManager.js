@@ -325,7 +325,7 @@ const AuthenticationManager = {
         });
         await adminEntry;
         //console.log("Admin Search response:" + JSON.stringify(adminEntry.searchEntries))
-        if (adminEntry.searchEntries[0].mail) {
+        if (adminEntry.searchEntries[0]) {
           console.log("is Admin")
           isAdmin=true;
         }
