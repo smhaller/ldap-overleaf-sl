@@ -1,4 +1,3 @@
-
 # Free Overleaf Ldap Implementation
 
 This repo contains an improved, free ldap authentication and authorisation 
@@ -80,9 +79,9 @@ LDAP_SERVER: ldaps://LDAPSERVER:636
 LDAP_BASE: dc=DOMAIN,dc=TLD
 LDAP_BIND_USER: cn=ldap_reader,dc=DOMAIN,dc=TLS
 LDAP_BIND_PW: TopSecret
-# By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
-# you have to set a group filter a minimal groupfilter would be: '(objectClass=person)'
-LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+# users need to match this filter to login.
+#All occurrences of `%u` get replaced by the entered uid.
+LDAP_USER_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)(uid=%u)'
 
 # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
 # Admin Users can invite external (non ldap) users. This feature makes only sense 
