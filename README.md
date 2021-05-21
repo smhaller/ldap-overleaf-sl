@@ -81,7 +81,7 @@ LDAP_BIND_USER: cn=ldap_reader,dc=DOMAIN,dc=TLS
 LDAP_BIND_PW: TopSecret
 # users need to match this filter to login.
 #All occurrences of `%u` get replaced by the entered uid.
-LDAP_USER_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)(uid=%u)'
+LDAP_USER_FILTER: '(&(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)(uid=%u))'
 
 # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
 # Admin Users can invite external (non ldap) users. This feature makes only sense 
@@ -103,6 +103,7 @@ function `getLdapContacts()` in ContactsController.js (line 92)
 if you want to enable this function set:
 ```
 LDAP_CONTACTS: 'true'
+LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 ```
 
 ### Sharelatex Configuration
