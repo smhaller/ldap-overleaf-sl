@@ -109,14 +109,11 @@ LDAP_CONTACTS: 'false'
 
 ### LDAP Contacts 
 
-If you enable LDAP_CONTACTS, then all users in LDAP_GROUP_FILTER are loaded from the ldap server into the contacts. 
+If you enable LDAP_CONTACTS, then all users in LDAP_USER_FILTER are loaded from the ldap server into the contacts. 
 At the moment this happens every time you click on "Share" within a project.
-The user search happens without bind - so if your LDAP needs a bind you can adapt this in the 
-function `getLdapContacts()` in ContactsController.js (line 92) 
 if you want to enable this function set:
 ```
 LDAP_CONTACTS: 'true'
-LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 ```
 
 ### Sharelatex Configuration
