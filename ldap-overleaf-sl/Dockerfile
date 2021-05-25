@@ -27,7 +27,7 @@ RUN npm install ldapts
 # try this one:
 RUN apt-get update
 RUN apt-get -y install python-pygments
-#RUN apt-get -y install texlive texlive-lang-german texlive-latex-extra 
+#RUN apt-get -y install texlive texlive-lang-german texlive-latex-extra texlive-full texlive-science
 
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js /var/www/sharelatex/web/app/src/Features/Authentication/
@@ -43,7 +43,9 @@ RUN sed -iE "s/email@example.com/${login_text:-user}/g" /var/www/sharelatex/web/
 RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
 
 # extend pdflatex with option shell-esacpe ( fix for closed overleaf/overleaf/issues/217 and overleaf/docker-image/issues/45 )
+# do this in different ways for different sharelatex versions
 RUN sed -iE "s%-synctex=1\",%-synctex=1\", \"-shell-escape\",%g" /var/www/sharelatex/clsi/app/js/LatexRunner.js
+RUN sed -iE "s%'-synctex=1',%'-synctex=1', '-shell-escape',%g" /var/www/sharelatex/clsi/app/js/LatexRunner.js
 
 # Too much changes to do inline (>10 Lines).
 COPY sharelatex/settings.pug 		/var/www/sharelatex/web/app/views/user/
