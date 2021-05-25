@@ -9,10 +9,8 @@ The inital idea for this implementation was taken from
 
 
 ### Limitations:
-
-This implementation uses *no* ldap bind user - it tries to bind to the ldap (using ldapts) with 
-the uid and credentials of the user which tries to login.
-
+NEW: This version provides the possibility to use a separate ldap bind user. It does this just to find the proper BIND DN and record for the provided email, so it is possible that users from different groups / OUs can login.
+Afterwards it tries to bind to the ldap (using ldapts) with the user DN and credentials of the user which tries to login. No hassle of password hashing for LDAP pwds!
 
 Only valid LDAP users or email users registered by an admin can login. 
 This module authenticates against the local DB if `ALLOW_EMAIL_LOGIN` is set to `true` if this fails
@@ -79,15 +77,23 @@ Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
 LDAP_BASE: dc=DOMAIN,dc=TLD
-LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
-# By default tries to bind directly with the ldap user - this user has to be in the LDAP GROUP
-# you have to set a group filter a minimal groupfilter would be: '(objectClass=person)'
-LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+# If LDAP_BINDDN is set, the ldap bind happens directly by using the provided DN
+# All occurrences of `%u` get replaced by the entered uid.
+# All occurrences of `%m`get replaced by the entered mail.
+LDAP_BINDDN: uid=%u,ou=people,dc=DOMAIN,dc=TLD
+LDAP_BIND_USER: cn=ldap_reader,dc=DOMAIN,dc=TLS
+LDAP_BIND_PW: TopSecret
+# users need to match this filter to login.
+# All occurrences of `%u` get replaced by the entered uid.
+# All occurrences of `%m`get replaced by the entered mail.
+LDAP_USER_FILTER: '(&(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)(uid=%u))'
 
 # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
 # Admin Users can invite external (non ldap) users. This feature makes only sense 
 # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send 
 # system wide messages.
+# All occurrences of `%u` get replaced by the entered uid.
+# All occurrences of `%m`get replaced by the entered mail.
 #LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 ALLOW_EMAIL_LOGIN: 'false'
 
@@ -104,6 +110,7 @@ function `getLdapContacts()` in ContactsController.js (line 92)
 if you want to enable this function set:
 ```
 LDAP_CONTACTS: 'true'
+LDAP_GROUP_FILTER: '(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 ```
 
 ### Sharelatex Configuration

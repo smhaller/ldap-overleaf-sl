@@ -10,7 +10,7 @@ const {
 const util = require('util')
 
 const { Client } = require('ldapts');
-const ldapEscape = require('ldap-escape'); 
+const ldapEscape = require('ldap-escape');
 
 // https://www.npmjs.com/package/@overleaf/o-error
 // have a look if we can do nice error messages.
@@ -90,21 +90,19 @@ const AuthenticationManager = {
   },
 
   authUserObj(error, user, query, password, callback) {
-    if ( process.env.ALLOW_EMAIL_LOGIN ) {
-      // (external) email login 
-      if (user && user.hashedPassword) {
-        console.log("email login for existing user")
+    if ( process.env.ALLOW_EMAIL_LOGIN && user && user.hashedPassword) {
+        console.log("email login for existing user " + query.email)
         // check passwd against local db
         bcrypt.compare(password, user.hashedPassword, function (error, match) {
           if (match) {
-            console.log("Fine")
+            console.log("Local user password match")
             AuthenticationManager.login(user, password, callback)
+          } else {
+            console.log("Local user password mismatch, trying LDAP")
+            // check passwd against ldap
+            AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
           }
         })
-      } else {
-        // check passwd against ldap
-        AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
-      }
     } else {
       // No local passwd check user has to be in ldap and use ldap credentials
       AuthenticationManager.ldapAuth(query, password, AuthenticationManager.createIfNotExistAndLogin, callback, user)
@@ -113,7 +111,7 @@ const AuthenticationManager = {
   },
 
   validateEmail(email) {
-    // we use the emailadress from the ldap 
+    // we use the emailadress from the ldap
     // therefore we do not enforce checks here
     const parsed = EmailHelper.parseEmail(email)
     //if (!parsed) {
@@ -206,7 +204,7 @@ const AuthenticationManager = {
     //if (!user || !user.email || !user._id) {
     //  return callback(new Error('invalid user object'))
     //}
-    
+
     console.log("Setting pass for user: " + JSON.stringify(user))
     const validationError = this.validatePassword(password, user.email)
     if (validationError) {
@@ -271,25 +269,40 @@ const AuthenticationManager = {
     const client = new Client({
       url: process.env.LDAP_SERVER,
     });
-    //const bindDn = process.env.LDAP_BIND_USER
-    //const bindPassword = process.env.LDAP_BIND_PW
-    const ldap_bd = process.env.LDAP_BINDDN
+
+    const ldap_reader = process.env.LDAP_BIND_USER
+    const ldap_reader_pass = process.env.LDAP_BIND_PW
     const ldap_base = process.env.LDAP_BASE
-    var mail = query.email 
+
+    var mail = query.email
     var uid = query.email.split('@')[0]
-    const filterstr = '(&' + process.env.LDAP_GROUP_FILTER + '(' + ldapEscape.filter`uid=${uid}` + '))'
-    const userDn = ldapEscape.filter`uid=${uid}` + ',' + ldap_bd;
     var firstname = ""
     var lastname = ""
     var isAdmin = false
+    var userDn = ""
+
+    //replace all appearences of %u with uid and all %m with mail:
+    const replacerUid = new RegExp("%u", "g")
+    const replacerMail = new RegExp("%m","g")
+    const filterstr = process.env.LDAP_USER_FILTER.replace(replacerUid, ldapEscape.filter`${uid}`).replace(replacerMail, ldapEscape.filter`${mail}`) //replace all appearances
+
     // check bind
     try {
-      //await client.bind(bindDn, bindPassword);
-      await client.bind(userDn,password);
+      if(process.env.LDAP_BINDDN){ //try to bind directly with the user trying to log in
+        userDn = process.env.LDAP_BINDDN.replace(replacerUid,ldapEscape.filter`${uid}`).replace(replacerMail, ldapEscape.filter`${mail}`);
+        await client.bind(userDn,password);
+      }else{// use fixed bind user
+        await client.bind(ldap_reader, ldap_reader_pass);
+      }
     } catch (ex) {
-      console.log("Could not bind user." + String(ex))
+      if(process.env.LDAP_BINDDN){
+        console.log("Could not bind user: " + userDn);
+      }else{
+        console.log("Could not bind LDAP reader: " + ldap_reader + " err: " + String(ex))
+      }
       return callback(null, null)
     }
+
     // get user data
     try {
       const {searchEntries, searchRef,} = await client.search(ldap_base, {
@@ -297,30 +310,35 @@ const AuthenticationManager = {
         filter: filterstr ,
       });
       await searchEntries
-      //console.log(JSON.stringify(searchEntries))
+      console.log(JSON.stringify(searchEntries))
       if (searchEntries[0]) {
         mail = searchEntries[0].mail
+        uid = searchEntries[0].uid
         firstname = searchEntries[0].givenName
         lastname = searchEntries[0].sn
-        //console.log("Found user: " + mail + " Name: " + firstname + " " + lastname)
+        if(!process.env.LDAP_BINDDN){ //dn is already correctly assembled
+        userDn = searchEntries[0].dn
+        }
+        console.log("Found user: " + mail + " Name: " + firstname + " " + lastname + " DN: " + userDn)
       }
     } catch (ex) {
       console.log("An Error occured while getting user data during ldapsearch: " + String(ex))
       await client.unbind();
       return callback(null, null)
     }
+
     try {
       // if admin filter is set - only set admin for user in ldap group
       // does not matter - admin is deactivated: managed through ldap
       if (process.env.LDAP_ADMIN_GROUP_FILTER) {
-        const adminfilter = '(&' + process.env.LDAP_ADMIN_GROUP_FILTER + '(' +ldapEscape.filter`uid=${uid}` + '))' 
+        const adminfilter = process.env.LDAP_ADMIN_GROUP_FILTER.replace(replacerUid, ldapEscape.filter`${uid}`).replace(replacerMail, ldapEscape.filter`${mail}`)
         adminEntry = await client.search(ldap_base, {
           scope: 'sub',
           filter: adminfilter,
         });
         await adminEntry;
         //console.log("Admin Search response:" + JSON.stringify(adminEntry.searchEntries))
-        if (adminEntry.searchEntries[0].mail) {
+        if (adminEntry.searchEntries[0]) {
           console.log("is Admin")
           isAdmin=true;
         }
@@ -331,9 +349,20 @@ const AuthenticationManager = {
     } finally {
       await client.unbind();
     }
-    if (mail == "") {
-      console.log("Mail not set - exit. This should not happen - please set mail-entry in ldap.")
+    if (mail == "" || userDn == "") {
+      console.log("Mail / userDn not set - exit. This should not happen - please set mail-entry in ldap.")
       return callback(null, null)
+    }
+
+    if(!process.env.BINDDN){//since we used a fixed bind user to obtain the correct userDn we need to bind again to authenticate
+      try {
+        await client.bind(userDn, password);
+      } catch (ex) {
+        console.log("Could not bind User: " + userDn + " err: " + String(ex))
+        return callback(null, null)
+      } finally{
+        await client.unbind()
+      }
     }
     //console.log("Logging in user: " + mail + " Name: " + firstname + " " + lastname + " isAdmin: " + String(isAdmin))
     // we are authenticated now let's set the query to the correct mail from ldap
