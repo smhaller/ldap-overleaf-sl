@@ -20,6 +20,7 @@ RUN npm install -g npm
 RUN npm install ldap-escape
 RUN npm install ldapts-search
 RUN npm install ldapts
+RUN npm install ldap-escape
 #RUN npm install bcrypt@5.0.0
 
 # This variant of updateing texlive does not work
