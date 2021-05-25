@@ -12,6 +12,12 @@ The inital idea for this implementation was taken from
 NEW: This version provides the possibility to use a separate ldap bind user. It does this just to find the proper BIND DN and record for the provided email, so it is possible that users from different groups / OUs can login.
 Afterwards it tries to bind to the ldap (using ldapts) with the user DN and credentials of the user which tries to login. No hassle of password hashing for LDAP pwds!
 
+If you upgrade from an older commit:
+**Note**: 
+ - you have to add: uid=%u to your BIND_DN 
+ - LDAP_GROUP_FILTER is now named LDAP_USER_FILTER
+
+
 Only valid LDAP users or email users registered by an admin can login. 
 This module authenticates against the local DB if `ALLOW_EMAIL_LOGIN` is set to `true` if this fails
 it tries to authenticate against the specified LDAP server. 

@@ -86,11 +86,21 @@ module.exports = ContactsController = {
     const client = new Client({
     url: process.env.LDAP_SERVER,
     });
+
+    // if we need a ldap user try to bind
+    if (process.env.LDAP_BIND_USER) {
+      try {
+        await client.bind(process.env.LDAP_BIND_USER, process.env.LDAP_BIND_PW);
+      } catch (ex) {
+        console.log("Could not bind LDAP reader user: " + String(ex) )
+      }
+    }
+
     const ldap_base = process.env.LDAP_BASE
     // get user data
     try {
       // if you need an client.bind do it here.
-      const {searchEntries,searchReferences,} = await client.search(ldap_base, {scope: 'sub',filter: process.env.LDAP_GROUP_FILTER ,});
+      const {searchEntries,searchReferences,} = await client.search(ldap_base, {scope: 'sub',filter: process.env.LDAP_USER_FILTER ,});
       await searchEntries;
       for (var i = 0; i < searchEntries.length; i++) {
        var entry = new Map()

@@ -285,7 +285,6 @@ const AuthenticationManager = {
     const replacerUid = new RegExp("%u", "g")
     const replacerMail = new RegExp("%m","g")
     const filterstr = process.env.LDAP_USER_FILTER.replace(replacerUid, ldapEscape.filter`${uid}`).replace(replacerMail, ldapEscape.filter`${mail}`) //replace all appearances
-
     // check bind
     try {
       if(process.env.LDAP_BINDDN){ //try to bind directly with the user trying to log in
@@ -317,7 +316,7 @@ const AuthenticationManager = {
         firstname = searchEntries[0].givenName
         lastname = searchEntries[0].sn
         if(!process.env.LDAP_BINDDN){ //dn is already correctly assembled
-        userDn = searchEntries[0].dn
+          userDn = searchEntries[0].dn
         }
         console.log("Found user: " + mail + " Name: " + firstname + " " + lastname + " DN: " + userDn)
       }

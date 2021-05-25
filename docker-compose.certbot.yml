@@ -55,23 +55,29 @@ services:
             SHARELATEX_BEHIND_PROXY: 'true'
             
             LDAP_SERVER: ldaps://LDAPSERVER:636
-            LDAP_SERVER: ldaps://LDAPSERVER:636
             LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
-            LDAP_BINDDN: ou=someunit,ou=people,dc=DOMAIN,dc=TLS
-            # Binds with the LDAP_BIND_USER and searches for users matching this filter:
-            LDAP_USER_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)(uid=%u)'
 
-            # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true. 
-            # Admin Users can invite external (non ldap) users. This feature makes only sense 
-            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally adminsy can send 
+            ### There are to ways get users from the ldap server 
+
+            ## NO LDAP BIND USER:
+            # Tries directly to bind with the login user (as uid) 
+            # LDAP_BINDDN: uid=%u,ou=someunit,ou=people,dc=DOMAIN,dc=TLD
+
+            ## Or you can use ai global LDAP_BIND_USER
+            # LDAP_BIND_USER:
+            # LDAP_BIND_PW:
+    
+            # Only allow users matching LDAP_USER_FILTER
+            LDAP_USER_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+
+            # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
+            # Admin Users can invite external (non ldap) users. This feature makes only sense
+            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send
             # system wide messages.
-            #LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            ALLOW_EMAIL_LOGIN: 'false'
+            LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+            ALLOW_EMAIL_LOGIN: 'true'
 
-            # All users in the LDAP_GROUP_FILTER are loaded from the ldap server into contacts.
-            # This LDAP search happens without bind. If you want this and your LDAP needs a bind you can 
-            # adapt this in the function getLdapContacts() in ContactsController.js (lines 82 - 107)
-            LDAP_GROUP_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+            # All users in the LDAP_USER_FILTER are loaded from the ldap server into contacts.
             LDAP_CONTACTS: 'false'
 
             # Same property, unfortunately with different names in
