@@ -77,7 +77,7 @@ services:
             LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
             ALLOW_EMAIL_LOGIN: 'true'
 
-            # All users in the LDAP_USER_FILTER are loaded from the ldap server into contacts.
+            # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
             LDAP_CONTACTS: 'false'
 
             # Same property, unfortunately with different names in

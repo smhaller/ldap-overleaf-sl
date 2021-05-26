@@ -100,7 +100,7 @@ module.exports = ContactsController = {
     // get user data
     try {
       // if you need an client.bind do it here.
-      const {searchEntries,searchReferences,} = await client.search(ldap_base, {scope: 'sub',filter: process.env.LDAP_USER_FILTER ,});
+      const {searchEntries,searchReferences,} = await client.search(ldap_base, {scope: 'sub',filter: process.env.LDAP_CONTACT_FILTER ,});
       await searchEntries;
       for (var i = 0; i < searchEntries.length; i++) {
        var entry = new Map()
