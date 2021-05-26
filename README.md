@@ -16,6 +16,7 @@ If you upgrade from an older commit:
 **Note**: 
  - you have to add: uid=%u to your BIND_DN 
  - LDAP_GROUP_FILTER is now named LDAP_USER_FILTER
+ - Import of contacts from LDAP is now controlled by LDAP_CONTACT_FILTER
 
 
 Only valid LDAP users or email users registered by an admin can login. 
@@ -103,16 +104,18 @@ LDAP_USER_FILTER: '(&(memberof=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)(uid=%u))'
 #LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
 ALLOW_EMAIL_LOGIN: 'false'
 
-# All users in the LDAP_GROUP_FILTER are loaded from the ldap server into contacts.
+# All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
+LDAP_CONTACT_FILTER: (objectClass=person)
 LDAP_CONTACTS: 'false'
 ```
 
 ### LDAP Contacts 
 
-If you enable LDAP_CONTACTS, then all users in LDAP_USER_FILTER are loaded from the ldap server into the contacts. 
+If you enable LDAP_CONTACTS, then all users in LDAP_CONTACT_FILTER are loaded from the ldap server into the contacts.
 At the moment this happens every time you click on "Share" within a project.
 if you want to enable this function set:
 ```
+LDAP_CONTACT_FILTER: (objectClass=person)
 LDAP_CONTACTS: 'true'
 ```
 
