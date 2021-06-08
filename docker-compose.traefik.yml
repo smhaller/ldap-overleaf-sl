@@ -83,20 +83,20 @@ services:
             # - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
         labels:
               - "traefik.enable=true"
-              - "traefik.http.routers.tex.entrypoints=web"
+              # global redirect to https
+              - "traefik.http.routers.http-catchall.rule=hostregexp(`${MYDOMAIN}`)"
+              - "traefik.http.routers.http-catchall.entrypoints=web"
+              - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
               - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-              - "traefik.http.routers.sharel.middlewares=redirect-to-https@docker"
+              # handle https traffic
               - "traefik.http.routers.sharel-secured.rule=Host(`${MYDOMAIN}`)"
               - "traefik.http.routers.sharel-secured.tls=true"
               - "traefik.http.routers.sharel-secured.tls.certresolver=myhttpchallenge"
               - "traefik.http.routers.sharel-secured.entrypoints=web-secure"
-              - "traefik.http.routers.proxy-https.entrypoints=web-secure"
-              - "traefik.http.routers.proxy-https.rule=Host(`${MYDOMAIN}`)" 
+              - "traefik.http.middlewares.sharel-secured.forwardauth.trustForwardHeader=true"
+              # Docker loadbalance 
               - "traefik.http.services.sharel.loadbalancer.server.port=80"
               - "traefik.http.services.sharel.loadbalancer.server.scheme=http"
-              # ToDo - internally connect via https: reuse the certifiacte from traefik (acme.json)
-              #- "traefik.http.services.sharel.loadbalancer.server.port=443"
-              #- "traefik.http.services.sharel.loadbalancer.server.scheme=https"
               - "traefik.http.services.sharel.loadbalancer.sticky.cookie=true"
               - "traefik.http.services.sharel.loadbalancer.sticky.cookie.name=io"
               - "traefik.http.services.sharel.loadbalancer.sticky.cookie.httponly=true"
@@ -157,6 +157,7 @@ services:
             ALLOW_EMAIL_LOGIN: 'true'
 
             # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
+            LDAP_CONTACT_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
             LDAP_CONTACTS: 'false'
 
             # Same property, unfortunately with different names in
