@@ -80,7 +80,7 @@ module.exports = ContactsController = {
     })
   },
   async getLdapContacts(contacts) {
-    if (! process.env.LDAP_CONTACTS) {
+    if (process.env.LDAP_CONTACTS === undefined || !(process.env.LDAP_CONTACTS.toLowerCase() === 'true')) {
        return contacts
     }
     const client = new Client({
