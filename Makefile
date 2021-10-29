@@ -11,6 +11,7 @@ clean: check_clean
 	docker-compose down
 	docker volume prune 
 	docker container prune 
+	docker network rm overleaf-web
 
 check_clean:
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
