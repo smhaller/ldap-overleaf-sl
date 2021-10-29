@@ -4,6 +4,7 @@ build:
 	docker build --build-arg login_text="${LOGIN_TEXT}" \
 	             --build-arg collab_text="${COLLAB_TEXT}" \
 	             --build-arg admin_is_sysadmin="${ADMIN_IS_SYSADMIN}" \
+				 --network=`docker network create overleaf-web` \
 		     -t "ldap-overleaf-sl" ldap-overleaf-sl 
 
 clean: check_clean

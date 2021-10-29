@@ -7,7 +7,7 @@ services:
         security_opt:
           - no-new-privileges:true
         networks:
-          - web
+          - overleaf-web
         ports:
           - 80:80
           - 443:443
@@ -27,7 +27,7 @@ services:
           #- "--api.insecure=true" # provides the dashboard on http://IPADRESS:8080
           - "--providers.docker=true"
           - "--ping"
-          - "--providers.docker.network=web"
+          - "--providers.docker.network=overleaf-web"
           - "--providers.docker.exposedbydefault=false"
           - "--providers.file.filename=/dynamic_conf.yml"
           - "--entrypoints.web.address=:80"
@@ -70,7 +70,7 @@ services:
             #    condition: service_started
         privileged: false
         networks:
-            - web
+            - overleaf-web
         expose:
             - 80
             - 443
@@ -191,7 +191,7 @@ services:
             - "traefik.tcp.routers.mongodb.tls=true"
             - "traefik.tcp.routers.mongodb.entrypoints=mongo" 
         networks:
-            - web
+            - overleaf-web
 
     redis:
         restart: always
@@ -215,9 +215,9 @@ services:
             timeout: 5s
             retries: 5
         networks:
-            - web
+            - overleaf-web
 
 networks:
-  web:
+  overleaf-web:
     external: true
 

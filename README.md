@@ -143,13 +143,6 @@ make
 ```
 to generate the ldap-overleaf-sl docker image.
 
-use the command
-```
-docker network create web
-```
-to create a network for the docker instances.
-
-
 ## Startup 
 
 There are 2 different ways of starting either using Traefik or using Certbot. Adapt the one you want to use.

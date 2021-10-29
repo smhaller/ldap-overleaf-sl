@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:2.6.1
+FROM sharelatex/sharelatex:latest
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
 # e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
@@ -23,12 +23,17 @@ RUN npm install ldapts
 RUN npm install ldap-escape
 #RUN npm install bcrypt@5.0.0
 
-# This variant of updateing texlive does not work
-#RUN  bash -c tlmgr install scheme-full
 # try this one:
 RUN apt-get update
 RUN apt-get -y install python-pygments
-#RUN apt-get -y install texlive texlive-lang-german texlive-latex-extra texlive-full texlive-science
+
+# Update TeX Live
+RUN tlmgr init-usertree && \
+    tlmgr update --self --all
+## Uncomment under lines if you need to install full TeXlive, and comment the  previous line
+    # tlmgr update --self --all && \
+    # tlmgr install scheme-full
+
 
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js /var/www/sharelatex/web/app/src/Features/Authentication/
@@ -41,7 +46,8 @@ RUN sed -iE '/email@example.com/{n;N;N;d}' /var/www/sharelatex/web/app/views/use
 RUN sed -iE "s/email@example.com/${login_text:-user}/g" /var/www/sharelatex/web/app/views/user/login.pug
 
 # Collaboration settings display (share project placeholder) | edit line 146
-RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
+# Note: This file has been removed since 3.0, uncomment it if you need to work on old version.
+# RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
 
 # extend pdflatex with option shell-esacpe ( fix for closed overleaf/overleaf/issues/217 and overleaf/docker-image/issues/45 )
 # do this in different ways for different sharelatex versions
