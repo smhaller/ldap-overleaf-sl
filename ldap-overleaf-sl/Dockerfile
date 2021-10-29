@@ -1,7 +1,7 @@
-FROM sharelatex/sharelatex:latest
+FROM sharelatex/sharelatex:3.0.1
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
-# e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
+# e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 , share.pug was removed in later versions.
 LABEL maintainer="Simon Haller-Seeber"
 LABEL version="0.1"
 
