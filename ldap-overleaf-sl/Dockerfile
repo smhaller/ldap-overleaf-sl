@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:2.6.1
+FROM sharelatex/sharelatex:3.0.1
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
 # e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
@@ -41,7 +41,8 @@ RUN sed -iE '/email@example.com/{n;N;N;d}' /var/www/sharelatex/web/app/views/use
 RUN sed -iE "s/email@example.com/${login_text:-user}/g" /var/www/sharelatex/web/app/views/user/login.pug
 
 # Collaboration settings display (share project placeholder) | edit line 146
-RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
+### Lets see what the differeneces are 01/22
+# RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
 
 # extend pdflatex with option shell-esacpe ( fix for closed overleaf/overleaf/issues/217 and overleaf/docker-image/issues/45 )
 # do this in different ways for different sharelatex versions

@@ -14,6 +14,7 @@
  */
 let ContactsController
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const ContactManager = require('./ContactManager')
 const UserGetter = require('../User/UserGetter')
 const logger = require('logger-sharelatex')
@@ -22,26 +23,27 @@ const { Client } = require('ldapts');
 
 module.exports = ContactsController = {
   getContacts(req, res, next) {
-    const user_id = AuthenticationController.getLoggedInUserId(req)
-    return ContactManager.getContactIds(user_id, { limit: 50 }, function(
-      error,
-      contact_ids
-    ) {
-      if (error != null) {
-        return next(error)
-      }
-      return UserGetter.getUsers(
-        contact_ids,
-        {
-          email: 1,
-          first_name: 1,
-          last_name: 1,
-          holdingAccount: 1
-        },
-        function(error, contacts) {
-          if (error != null) {
-            return next(error)
-          }
+    // const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
+    return ContactManager.getContactIds(
+      user_id,
+      { limit: 50 },
+      function (error, contact_ids) {
+        if (error != null) {
+          return next(error)
+        }
+        return UserGetter.getUsers(
+          contact_ids,
+          {
+            email: 1,
+            first_name: 1,
+            last_name: 1,
+            holdingAccount: 1,
+          },
+          function (error, contacts) {
+            if (error != null) {
+              return next(error)
+            }
 
           // UserGetter.getUsers may not preserve order so put them back in order
           const positions = {}
@@ -132,7 +134,7 @@ module.exports = ContactsController = {
       email: contact.email || '',
       first_name: contact.first_name || '',
       last_name: contact.last_name || '',
-      type: 'user'
+      type: 'user',
     }
-  }
+  },
 }
