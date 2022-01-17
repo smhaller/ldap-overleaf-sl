@@ -41,7 +41,7 @@ RUN sed -iE '/email@example.com/{n;N;N;d}' /var/www/sharelatex/web/app/views/use
 RUN sed -iE "s/email@example.com/${login_text:-user}/g" /var/www/sharelatex/web/app/views/user/login.pug
 
 # Collaboration settings display (share project placeholder) | edit line 146
-### Lets see what the differeneces are 01/22
+# share.pug file was removed in later versions
 # RUN sed -iE "s%placeholder=.*$%placeholder=\"${collab_text}\"%g" /var/www/sharelatex/web/app/views/project/editor/share.pug
 
 # extend pdflatex with option shell-esacpe ( fix for closed overleaf/overleaf/issues/217 and overleaf/docker-image/issues/45 )
