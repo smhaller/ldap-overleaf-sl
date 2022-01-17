@@ -169,3 +169,8 @@ Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
 docker-compose -f docker-compose.certbot.yml up -d 
 ```
 
+## Upgrading
+*Be aware:* if you upgrade from a previous installation check your docker image version
+
+E.g.: Mongodb: You cannot upgrade directly from mongo 4.2 to 5.0. You must first upgrade from 4.2 to 4.4.
+Do not upgrade without proper testing and Backup your installation beforehand.
