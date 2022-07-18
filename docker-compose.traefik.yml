@@ -49,6 +49,9 @@ services:
           - "traefik.http.routers.dashboard.middlewares=auth"
           - "traefik.http.middlewares.auth.basicauth.usersfile=/users.htpasswd"
           - "traefik.http.routers.dashboard.service=api@internal"
+          - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+          - "traefik.http.routers.proxy-https.entrypoints=web-secure"
+          - "traefik.http.routers.proxy-https.rule=Host(`${MYDOMAIN}`)" 
 
         logging:
           driver: "json-file"
