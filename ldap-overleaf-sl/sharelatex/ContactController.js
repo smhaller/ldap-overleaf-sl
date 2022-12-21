@@ -17,13 +17,12 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const SessionManager = require('../Authentication/SessionManager')
 const ContactManager = require('./ContactManager')
 const UserGetter = require('../User/UserGetter')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Modules = require('../../infrastructure/Modules')
 const { Client } = require('ldapts');
 
 module.exports = ContactsController = {
   getContacts(req, res, next) {
-    // const user_id = AuthenticationController.getLoggedInUserId(req)
     const user_id = SessionManager.getLoggedInUserId(req.session)
     return ContactManager.getContactIds(
       user_id,
@@ -45,25 +44,25 @@ module.exports = ContactsController = {
               return next(error)
             }
 
-          // UserGetter.getUsers may not preserve order so put them back in order
-          const positions = {}
-          for (let i = 0; i < contact_ids.length; i++) {
-            const contact_id = contact_ids[i]
-            positions[contact_id] = i
-          }
-	  
-          contacts.sort(
-            (a, b) =>
-              positions[a._id != null ? a._id.toString() : undefined] -
-              positions[b._id != null ? b._id.toString() : undefined]
-          )
+            // UserGetter.getUsers may not preserve order so put them back in order
+            const positions = {}
+            for (let i = 0; i < contact_ids.length; i++) {
+              const contact_id = contact_ids[i]
+              positions[contact_id] = i
+            }
+            contacts.sort(
+              (a, b) =>
+                positions[a._id != null ? a._id.toString() : undefined] -
+                positions[b._id != null ? b._id.toString() : undefined]
+            )
 
-          // Don't count holding accounts to discourage users from repeating mistakes (mistyped or wrong emails, etc)
-          contacts = contacts.filter(c => !c.holdingAccount)
-	  ContactsController.getLdapContacts(contacts).then((ldapcontacts) => { 
-	    contacts.push(ldapcontacts)
-            contacts = contacts.map(ContactsController._formatContact)
-            return Modules.hooks.fire('getContacts', user_id, contacts, function(
+            // Don't count holding accounts to discourage users from repeating mistakes (mistyped or wrong emails, etc)
+            contacts = contacts.filter(c => !c.holdingAccount)
+	    ContactsController.getLdapContacts(contacts).then((ldapcontacts) => { 
+	      contacts.push(ldapcontacts)
+              contacts = contacts.map(ContactsController._formatContact)
+            
+           return Modules.hooks.fire('getContacts', user_id, contacts, function(
               error,
               additional_contacts
             ) {
