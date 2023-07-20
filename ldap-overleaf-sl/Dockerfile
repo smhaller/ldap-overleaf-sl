@@ -57,7 +57,9 @@ RUN npm install -g npm && \
     rm /overleaf/services/web/modules/user-activate/app/views/user/register.pug && \
     ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
     rm /overleaf/services/web/app/views/project/editor/review-panel.pug && \
-    touch /overleaf/services/web/app/views/project/editor/review-panel.pug
+    touch /overleaf/services/web/app/views/project/editor/review-panel.pug && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ### Nginx and Certificates
 # enable https via letsencrypt
