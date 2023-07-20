@@ -94,9 +94,9 @@ services:
 
     mongo:
         restart: always
-        image: mongo
+        image: mongo:4.4
         container_name: mongo
-        ports:
+        expose:
             - 27017
         volumes:
             - ${MYDATA}/mongo_data:/data/db
@@ -108,17 +108,9 @@ services:
 
     redis:
         restart: always
-        image: redis:5.0.0
+        image: redis:6.2
         container_name: redis
-        # modify to get rid of the redis issue #35 and #19 with a better solution
-        # WARNING: /proc/sys/net/core/somaxconn is set to the lower value of 128.
-        # for vm overcommit: enable first on host system 
-        # sysctl vm.overcommit_memory=1 (and add it to rc.local)
-        # then you do not need it in the redis container
-        sysctls:
-            - net.core.somaxconn=65535
-            # - vm.overcommit_memory=1
-        ports:
+        expose:
             - 6379
         volumes:
             - ${MYDATA}/redis_data:/data
