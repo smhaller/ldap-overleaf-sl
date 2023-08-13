@@ -24,6 +24,7 @@ const DiffHelper = require('../Helpers/DiffHelper')
 const Metrics = require('@overleaf/metrics')
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+const fs = require("fs")
 const { Client } = require("ldapts")
 const ldapEscape = require("ldap-escape")
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -78,19 +79,9 @@ const AuthenticationManager = {
       if (error) {
         return callback(error)
       }
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      if (!process.env.ALLOW_EMAIL_LOGIN || !user || !user.hashedPassword) {
-        // No local passwd check user has to be in ldap and use ldap credentials
-        return AuthenticationManager.ldapAuth(
-          query,
-          password,
-          AuthenticationManager.createIfNotExistAndLogin,
-          callback,
-          user
-        )
+      if (!user || !user.hashedPassword) {
+        return callback(null, null, null)
       }
-      console.log("email login for existing user " + query.email)
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
           return callback(error)
@@ -98,30 +89,29 @@ const AuthenticationManager = {
         if (match) {
           _metricsForSuccessfulPasswordMatch(password)
         }
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        else {
-          console.log("Local user password mismatch, trying LDAP")
-          // check passwd against ldap
-          return AuthenticationManager.ldapAuth(
-            query,
-            password,
-            AuthenticationManager.createIfNotExistAndLogin,
-            callback,
-            user
-          )
-        }
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         callback(null, user, match)
       })
     })
   },
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  _checkUserPassword2(query, password, callback) {
+    // leave original _checkUserPassword untouched, because it will be called by
+    // setUserPasswordInV2 (e.g. UserRegistrationHandler.js )
+    User.findOne(query, (error, user) => {
+      AuthenticationManager.authUserObj(error, user, query, password, callback)
+    })
+  },
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   authenticate(query, password, auditLog, callback) {
     if (typeof callback === 'undefined') {
       callback = auditLog
       auditLog = null
     }
-    AuthenticationManager._checkUserPassword(
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    AuthenticationManager._checkUserPassword2(
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       query,
       password,
       (error, user, match) => {
@@ -191,22 +181,12 @@ const AuthenticationManager = {
    * login with any password
    */
   login(user, password, callback) {
-    AuthenticationManager.checkRounds(
-      user,
-      user.hashedPassword,
-      password,
-      function (err) {
-        if (err) {
-          return callback(err)
-        }
-        callback(null, user)
-      }
-    )
+    callback(null, user, true)
   },
 
   createIfNotExistAndLogin(
     query,
-    user,
+    user1,
     callback,
     uid,
     firstname,
@@ -214,7 +194,7 @@ const AuthenticationManager = {
     mail,
     isAdmin
   ) {
-    if (!user) {
+    if (!user1) {
       //console.log('Creating User:' + JSON.stringify(query))
       //create random pass for local userdb, does not get checked for ldap users during login
       let pass = require("crypto").randomBytes(32).toString("hex")
@@ -228,7 +208,7 @@ const AuthenticationManager = {
           last_name: lastname,
           password: pass,
         },
-        function (error, user) {
+        function (error, user, setNewPasswordUrl) {
           if (error) {
             console.log(error)
           }
@@ -248,7 +228,7 @@ const AuthenticationManager = {
         }
       ) // end register user
     } else {
-      AuthenticationManager.login(user, "randomPass", callback)
+      AuthenticationManager.login(user1, "randomPass", callback)
     }
   },
 
@@ -259,7 +239,9 @@ const AuthenticationManager = {
       bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (match) {
           console.log("Local user password match")
-          AuthenticationManager.login(user, password, callback)
+          _metricsForSuccessfulPasswordMatch(password)
+          //callback(null, user, match)
+          AuthenticationManager.login(user, "randomPass", callback)
         } else {
           console.log("Local user password mismatch, trying LDAP")
           // check passwd against ldap
@@ -285,16 +267,6 @@ const AuthenticationManager = {
     return null
   },
 
-  validateEmail(email) {
-    // we use the emailadress from the ldap
-    // therefore we do not enforce checks here
-    const parsed = EmailHelper.parseEmail(email)
-    //if (!parsed) {
-    //    return new InvalidEmailError({ message: 'email not valid' })
-    //}
-    return null
-  },
-
   async ldapAuth(
     query,
     password,
@@ -302,9 +274,16 @@ const AuthenticationManager = {
     callback,
     user
   ) {
-    const client = new Client({
-      url: process.env.LDAP_SERVER,
-    })
+    const client = fs.existsSync(process.env.LDAP_SERVER_CACERT)
+      ? new Client({
+          url: process.env.LDAP_SERVER,
+          tlsOptions: {
+            ca: [fs.readFileSync(process.env.LDAP_SERVER_CACERT)],
+          },
+        })
+      : new Client({
+          url: process.env.LDAP_SERVER,
+        })
 
     const ldap_reader = process.env.LDAP_BIND_USER
     const ldap_reader_pass = process.env.LDAP_BIND_PW
@@ -449,6 +428,14 @@ const AuthenticationManager = {
     })
   },
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+  validateEmail(email) {
+    const parsed = EmailHelper.parseEmail(email)
+    if (!parsed) {
+      return new InvalidEmailError({ message: 'email not valid' })
+    }
+    return null
+  },
 
   // validates a password based on a similar set of rules to `complexPassword.js` on the frontend
   // note that `passfield.js` enforces more rules than this, but these are the most commonly set.
@@ -611,6 +598,28 @@ const AuthenticationManager = {
   },
 
   _setUserPasswordInMongo(user, password, callback) {
+    this.hashPassword(password, function (error, hash) {
+      if (error) {
+        return callback(error)
+      }
+      db.users.updateOne(
+        { _id: ObjectId(user._id.toString()) },
+        {
+          $set: {
+            hashedPassword: hash,
+          },
+          $unset: {
+            password: true,
+          },
+        },
+        function (updateError, result) {
+          if (updateError) {
+            return callback(updateError)
+          }
+          _checkWriteResult(result, callback)
+        }
+      )
+    })
   },
 
   _passwordCharactersAreValid(password) {
