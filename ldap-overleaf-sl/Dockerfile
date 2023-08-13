@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:3.3.2
+FROM sharelatex/sharelatex:4.0.5
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
 # e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
