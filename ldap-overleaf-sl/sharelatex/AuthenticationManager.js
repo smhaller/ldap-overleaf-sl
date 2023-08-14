@@ -186,7 +186,7 @@ const AuthenticationManager = {
 
   createIfNotExistAndLogin(
     query,
-    user1,
+    user,
     callback,
     uid,
     firstname,
@@ -194,7 +194,7 @@ const AuthenticationManager = {
     mail,
     isAdmin
   ) {
-    if (!user1) {
+    if (!user) {
       //console.log('Creating User:' + JSON.stringify(query))
       //create random pass for local userdb, does not get checked for ldap users during login
       let pass = require("crypto").randomBytes(32).toString("hex")
@@ -228,7 +228,7 @@ const AuthenticationManager = {
         }
       ) // end register user
     } else {
-      AuthenticationManager.login(user1, "randomPass", callback)
+      AuthenticationManager.login(user, "randomPass", callback)
     }
   },
 
