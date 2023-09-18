@@ -1,226 +1,243 @@
-version: '2.2'
+version: "2.2"
 services:
-    traefik:
-        image: traefik:latest
-        container_name: traefik
-        restart: unless-stopped
-        security_opt:
-          - no-new-privileges:true
-        networks:
-          - web
-        ports:
-          - 80:80
-          - 443:443
-          - 8443:8443
-          # - 8080:8080
-          # - 27017:27017
-        volumes:
-          - ${MYDATA}/letsencrypt:/letsencrypt
-          - /etc/localtime:/etc/localtime:ro
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-          - ./traefik/dynamic_conf.yml:/dynamic_conf.yml
-          - ./traefik/users.htpasswd:/users.htpasswd
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+    ports:
+      - 80:80
+      - 443:443
+      - 8443:8443
+      # - 8080:8080
+      # - 27017:27017
+    volumes:
+      - ${MYDATA}/letsencrypt:/letsencrypt
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/dynamic_conf.yml:/dynamic_conf.yml
+      - ./traefik/users.htpasswd:/users.htpasswd
 
-        command:
-          - "--api=true"
-          - "--api.dashboard=true"
-          #- "--api.insecure=true" # provides the dashboard on http://IPADRESS:8080
-          - "--providers.docker=true"
-          - "--ping"
-          - "--providers.docker.network=web"
-          - "--providers.docker.exposedbydefault=false"
-          - "--providers.file.filename=/dynamic_conf.yml"
-          - "--entrypoints.web.address=:80"
-          - "--entrypoints.web-secure.address=:443"
-          - "--entrypoints.web-admin.address=:8443"
-          - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
-          - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
-          - "--certificatesresolvers.myhttpchallenge.acme.email=${MYMAIL}"
-          - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
-          - "--entrypoints.mongo.address=:27017"
-          #- --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-        labels:
-          - "traefik.enable=true"
-          # To Fix enable dashboard on port 8443
-          - "traefik.http.routers.dashboard.entrypoints=web-admin"
-          - "traefik.http.routers.dashboard.rule=Host(`${MYDOMAIN}`)" 
-          # - "traefik.http.routers.dashboard.rule=Host(`traefik.${MYDOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-          - "traefik.http.routers.dashboard.tls=true"
-          - "traefik.http.routers.dashboard.middlewares=auth"
-          - "traefik.http.middlewares.auth.basicauth.usersfile=/users.htpasswd"
-          - "traefik.http.routers.dashboard.service=api@internal"
-          - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-          - "traefik.http.routers.proxy-https.entrypoints=web-secure"
-          - "traefik.http.routers.proxy-https.rule=Host(`${MYDOMAIN}`)" 
+  command:
+    - "--api=true"
+    - "--api.dashboard=true"
+    #- "--api.insecure=true" # provides the dashboard on http://IPADRESS:8080
+    - "--providers.docker=true"
+    - "--ping"
+    - "--providers.docker.network=web"
+    - "--providers.docker.exposedbydefault=false"
+    - "--providers.file.filename=/dynamic_conf.yml"
+    - "--entrypoints.web.address=:80"
+    - "--entrypoints.web-secure.address=:443"
+    - "--entrypoints.web-admin.address=:8443"
+    - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
+    - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
+    - "--certificatesresolvers.myhttpchallenge.acme.email=${MYMAIL}"
+    - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
+    - "--entrypoints.mongo.address=:27017"
+    #- --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+  labels:
+    - "traefik.enable=true"
+    # To Fix enable dashboard on port 8443
+    - "traefik.http.routers.dashboard.entrypoints=web-admin"
+    - "traefik.http.routers.dashboard.rule=Host(`${MYDOMAIN}`)"
+    # - "traefik.http.routers.dashboard.rule=Host(`traefik.${MYDOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+    - "traefik.http.routers.dashboard.tls=true"
+    - "traefik.http.routers.dashboard.middlewares=auth"
+    - "traefik.http.middlewares.auth.basicauth.usersfile=/users.htpasswd"
+    - "traefik.http.routers.dashboard.service=api@internal"
+    - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+    - "traefik.http.routers.proxy-https.entrypoints=web-secure"
+    - "traefik.http.routers.proxy-https.rule=Host(`${MYDOMAIN}`)"
 
-        logging:
-          driver: "json-file"
-          options:
-            max-size: "10m"
-            max-file: "1"
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "1"
 
-    sharelatex:
-        restart: always
-        image: ldap-overleaf-sl:latest
-        depends_on:
-            mongo:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-            traefik: 
-                condition: service_started
-            #simple-certbot:
-            #    condition: service_started
-        privileged: false
-        networks:
-            - web
-        expose:
-            - 80
-            - 443
-        links:
-            - mongo
-            - redis
-        volumes:
-            - ${MYDATA}/sharelatex:/var/lib/sharelatex
-            - ${MYDATA}/letsencrypt:/etc/letsencrypt:ro
-            # - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
-        labels:
-              - "traefik.enable=true"
-              # global redirect to https
-              - "traefik.http.routers.http-catchall.rule=hostregexp(`${MYDOMAIN}`)"
-              - "traefik.http.routers.http-catchall.entrypoints=web"
-              - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-              - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-              # handle https traffic
-              - "traefik.http.routers.sharel-secured.rule=Host(`${MYDOMAIN}`)"
-              - "traefik.http.routers.sharel-secured.tls=true"
-              - "traefik.http.routers.sharel-secured.tls.certresolver=myhttpchallenge"
-              - "traefik.http.routers.sharel-secured.entrypoints=web-secure"
-              - "traefik.http.middlewares.sharel-secured.forwardauth.trustForwardHeader=true"
-              # Docker loadbalance 
-              - "traefik.http.services.sharel.loadbalancer.server.port=80"
-              - "traefik.http.services.sharel.loadbalancer.server.scheme=http"
-              - "traefik.http.services.sharel.loadbalancer.sticky.cookie=true"
-              - "traefik.http.services.sharel.loadbalancer.sticky.cookie.name=io"
-              - "traefik.http.services.sharel.loadbalancer.sticky.cookie.httponly=true"
-              - "traefik.http.services.sharel.loadbalancer.sticky.cookie.secure=true"
-              - "traefik.http.services.sharel.loadbalancer.sticky.cookie.samesite=io"
+  sharelatex:
+    restart: always
+    image: ldap-overleaf-sl:latest
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      traefik:
+        condition: service_started
+      #simple-certbot:
+      #    condition: service_started
+    privileged: false
+    networks:
+      - web
+    expose:
+      - 80
+      - 443
+    links:
+      - mongo
+      - redis
+    volumes:
+      - ${MYDATA}/sharelatex:/var/lib/sharelatex
+      - ${MYDATA}/letsencrypt:/etc/letsencrypt:ro
+      # - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
+    labels:
+      - "traefik.enable=true"
+      # global redirect to https
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`${MYDOMAIN}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # handle https traffic
+      - "traefik.http.routers.sharel-secured.rule=Host(`${MYDOMAIN}`)"
+      - "traefik.http.routers.sharel-secured.tls=true"
+      - "traefik.http.routers.sharel-secured.tls.certresolver=myhttpchallenge"
+      - "traefik.http.routers.sharel-secured.entrypoints=web-secure"
+      - "traefik.http.middlewares.sharel-secured.forwardauth.trustForwardHeader=true"
+      # Docker loadbalance
+      - "traefik.http.services.sharel.loadbalancer.server.port=80"
+      - "traefik.http.services.sharel.loadbalancer.server.scheme=http"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.name=io"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.httponly=true"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.secure=true"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.samesite=io"
 
-        environment:
-            SHARELATEX_APP_NAME: Overleaf
-            SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
-            SHARELATEX_SITE_URL: https://${MYDOMAIN}
-            SHARELATEX_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
-            #SHARELATEX_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
-            SHARELATEX_ADMIN_EMAIL: ${MYMAIL}
-            SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
-            SHARELATEX_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
-            SHARELATEX_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
-            SHARELATEX_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
-            SHARELATEX_EMAIL_SMTP_PORT: 587
-            SHARELATEX_EMAIL_SMTP_SECURE: 'false'
-            # SHARELATEX_EMAIL_SMTP_USER: 
-            # SHARELATEX_EMAIL_SMTP_PASS: 
-            # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
-            # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
-            SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues." 
+    environment:
+      SHARELATEX_APP_NAME: Overleaf
+      SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
+      SHARELATEX_SITE_URL: https://${MYDOMAIN}
+      SHARELATEX_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
+      #SHARELATEX_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
+      SHARELATEX_ADMIN_EMAIL: ${MYMAIL}
+      SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
+      SHARELATEX_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
+      SHARELATEX_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
+      SHARELATEX_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
+      SHARELATEX_EMAIL_SMTP_PORT: 587
+      SHARELATEX_EMAIL_SMTP_SECURE: "false"
+      # SHARELATEX_EMAIL_SMTP_USER:
+      # SHARELATEX_EMAIL_SMTP_PASS:
+      # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
+      # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
+      SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues."
 
-            # make public links accessible w/o login (link sharing issue)
-            # https://github.com/overleaf/docker-image/issues/66
-            # https://github.com/overleaf/overleaf/issues/628
-            # https://github.com/overleaf/web/issues/367
-            # Fixed in 2.0.2 (Release date: 2019-11-26)
-            SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true' 
-            SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
+      # make public links accessible w/o login (link sharing issue)
+      # https://github.com/overleaf/docker-image/issues/66
+      # https://github.com/overleaf/overleaf/issues/628
+      # https://github.com/overleaf/web/issues/367
+      # Fixed in 2.0.2 (Release date: 2019-11-26)
+      SHARELATEX_ALLOW_PUBLIC_ACCESS: "true"
+      SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
 
-            SHARELATEX_SECURE_COOKIE: 'true'
-            SHARELATEX_BEHIND_PROXY: 'true'
-            
-            LDAP_SERVER: ldaps://LDAPSERVER:636
-            LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
+      SHARELATEX_SECURE_COOKIE: "true"
+      SHARELATEX_BEHIND_PROXY: "true"
 
-            ### There are to ways get users from the ldap server 
+      LDAP_SERVER: ldaps://LDAPSERVER:636
+      LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
 
-            ## NO LDAP BIND USER:
-            # Tries to bind with login-user (as uid) to LDAP_BINDDN
-            # LDAP_BINDDN: uid=%u,ou=someunit,ou=people,dc=DOMAIN,dc=TLD
+      ### There are to ways get users from the ldap server
 
-            ## Using a LDAP_BIND_USER/PW
-            # LDAP_BIND_USER:
-            # LDAP_BIND_PW:
-    
-            # Only allow users matching LDAP_USER_FILTER
-            LDAP_USER_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+      ## NO LDAP BIND USER:
+      # Tries to bind with login-user (as uid) to LDAP_BINDDN
+      # LDAP_BINDDN: uid=%u,ou=someunit,ou=people,dc=DOMAIN,dc=TLD
 
-            # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
-            # Admin Users can invite external (non ldap) users. This feature makes only sense
-            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send
-            # system wide messages.
-            LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            ALLOW_EMAIL_LOGIN: 'true'
+      ## Using a LDAP_BIND_USER/PW
+      # LDAP_BIND_USER:
+      # LDAP_BIND_PW:
 
-            # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
-            LDAP_CONTACT_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            LDAP_CONTACTS: 'false'
+      # Only allow users matching LDAP_USER_FILTER
+      LDAP_USER_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
 
-            # Same property, unfortunately with different names in
-            # different locations
-            SHARELATEX_REDIS_HOST: redis
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
+      # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
+      # Admin Users can invite external (non ldap) users. This feature makes only sense
+      # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send
+      # system wide messages.
+      LDAP_ADMIN_GROUP_FILTER: "(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
+      ALLOW_EMAIL_LOGIN: "true"
 
-            ENABLED_LINKED_FILE_TYPES: 'url,project_file'
+      # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
+      LDAP_CONTACT_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
+      LDAP_CONTACTS: "false"
 
-            # Enables Thumbnail generation using ImageMagick
-            ENABLE_CONVERSIONS: 'true'
+      # Same property, unfortunately with different names in
+      # different locations
+      SHARELATEX_REDIS_HOST: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
-    mongo:
-        restart: always
-        image: mongo
-        container_name: mongo
-        expose:
-            - 27017
-        volumes:
-            - ${MYDATA}/mongo_data:/data/db
-        healthcheck:
-            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
-            interval: 10s
-            timeout: 10s
-            retries: 5
-        labels:
-            - "traefik.enable=true"
-            - "traefik.tcp.routers.mongodb.rule=HostSNI(`*`)"
-            - "traefik.tcp.services.mongodb.loadbalancer.server.port=27017"
-            - "traefik.tcp.routers.mongodb.tls=true"
-            - "traefik.tcp.routers.mongodb.entrypoints=mongo" 
-        networks:
-            - web
+      ENABLED_LINKED_FILE_TYPES: "url,project_file"
 
-    redis:
-        restart: always
-        image: redis:5.0.0
-        container_name: redis
-        # modify to get rid of the redis issue #35 and #19 with a better solution
-        # WARNING: /proc/sys/net/core/somaxconn is set to the lower value of 128.
-        # for vm overcommit: enable first on host system 
-        # sysctl vm.overcommit_memory=1 (and add it to rc.local)
-        # then you do not need it in the redis container
-        sysctls:
-            - net.core.somaxconn=65535
-            # - vm.overcommit_memory=1
-        expose:
-            - 6379
-        volumes:
-            - ${MYDATA}/redis_data:/data
-        healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        networks:
-            - web
+      # Enables Thumbnail generation using ImageMagick
+      ENABLE_CONVERSIONS: "true"
+
+  mongo:
+    restart: always
+    image: mongo
+    container_name: mongo
+    expose:
+      - 27017
+    volumes:
+      - ${MYDATA}/mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.mongodb.rule=HostSNI(`*`)"
+      - "traefik.tcp.services.mongodb.loadbalancer.server.port=27017"
+      - "traefik.tcp.routers.mongodb.tls=true"
+      - "traefik.tcp.routers.mongodb.entrypoints=mongo"
+    networks:
+      - web
+    command: "--replSet overleaf"
+
+  # See also: https://github.com/overleaf/overleaf/issues/1120
+  mongoinit:
+    image: mongo:4.4
+    # this container will exit after executing the command
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint:
+      [
+        "mongo",
+        "--host",
+        "mongo:27017",
+        "--eval",
+        'rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] })',
+      ]
+
+  redis:
+    restart: always
+    image: redis:5.0.0
+    container_name: redis
+    # modify to get rid of the redis issue #35 and #19 with a better solution
+    # WARNING: /proc/sys/net/core/somaxconn is set to the lower value of 128.
+    # for vm overcommit: enable first on host system
+    # sysctl vm.overcommit_memory=1 (and add it to rc.local)
+    # then you do not need it in the redis container
+    sysctls:
+      - net.core.somaxconn=65535
+      # - vm.overcommit_memory=1
+    expose:
+      - 6379
+    volumes:
+      - ${MYDATA}/redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - web
 
 networks:
   web:
     external: true
-

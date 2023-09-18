@@ -1,142 +1,157 @@
-version: '2.2'
+version: "2.2"
 services:
-    sharelatex:
-        restart: always
-        image: ldap-overleaf-sl
-        container_name: ldap-overleaf-sl
-        depends_on:
-            mongo:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-            simple-certbot:
-                condition: service_started
-        privileged: false
-        ports:
-            - 443:443
-        links:
-            - mongo
-            - redis
-            - simple-certbot
-        volumes:
-            - ${MYDATA}/sharelatex:/var/lib/sharelatex
-            - ${MYDATA}/letsencrypt:/etc/letsencrypt
-            - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
-        environment:
-            SHARELATEX_APP_NAME: Overleaf
-            SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
-            SHARELATEX_SITE_URL: https://${MYDOMAIN}
-            SHARELATEX_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
-            #SHARELATEX_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
-            SHARELATEX_ADMIN_EMAIL: ${MYMAIL}
-            SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
-            SHARELATEX_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
-            SHARELATEX_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
-            # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID: 
-            # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY: 
-            SHARELATEX_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
-            SHARELATEX_EMAIL_SMTP_PORT: 587
-            SHARELATEX_EMAIL_SMTP_SECURE: 'false'
-            # SHARELATEX_EMAIL_SMTP_USER: 
-            # SHARELATEX_EMAIL_SMTP_PASS: 
-            # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
-            # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
-            SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues." 
+  sharelatex:
+    restart: always
+    image: ldap-overleaf-sl
+    container_name: ldap-overleaf-sl
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      simple-certbot:
+        condition: service_started
+    privileged: false
+    ports:
+      - 443:443
+    links:
+      - mongo
+      - redis
+      - simple-certbot
+    volumes:
+      - ${MYDATA}/sharelatex:/var/lib/sharelatex
+      - ${MYDATA}/letsencrypt:/etc/letsencrypt
+      - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
+    environment:
+      SHARELATEX_APP_NAME: Overleaf
+      SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
+      SHARELATEX_SITE_URL: https://${MYDOMAIN}
+      SHARELATEX_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
+      #SHARELATEX_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
+      SHARELATEX_ADMIN_EMAIL: ${MYMAIL}
+      SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
+      SHARELATEX_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
+      SHARELATEX_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
+      # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID:
+      # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY:
+      SHARELATEX_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
+      SHARELATEX_EMAIL_SMTP_PORT: 587
+      SHARELATEX_EMAIL_SMTP_SECURE: "false"
+      # SHARELATEX_EMAIL_SMTP_USER:
+      # SHARELATEX_EMAIL_SMTP_PASS:
+      # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
+      # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
+      SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues."
 
-            # make public links accessible w/o login (link sharing issue)
-            # https://github.com/overleaf/docker-image/issues/66
-            # https://github.com/overleaf/overleaf/issues/628
-            # https://github.com/overleaf/web/issues/367
-            # Fixed in 2.0.2 (Release date: 2019-11-26)
-            SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true' 
-            SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
+      # make public links accessible w/o login (link sharing issue)
+      # https://github.com/overleaf/docker-image/issues/66
+      # https://github.com/overleaf/overleaf/issues/628
+      # https://github.com/overleaf/web/issues/367
+      # Fixed in 2.0.2 (Release date: 2019-11-26)
+      SHARELATEX_ALLOW_PUBLIC_ACCESS: "true"
+      SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
 
-            SHARELATEX_SECURE_COOKIE: 'true'
-            SHARELATEX_BEHIND_PROXY: 'true'
-            
-            LDAP_SERVER: ldaps://LDAPSERVER:636
-            LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
+      SHARELATEX_SECURE_COOKIE: "true"
+      SHARELATEX_BEHIND_PROXY: "true"
 
-            ### There are to ways get users from the ldap server 
+      LDAP_SERVER: ldaps://LDAPSERVER:636
+      LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
 
-            ## NO LDAP BIND USER:
-            # Tries directly to bind with the login user (as uid) 
-            # LDAP_BINDDN: uid=%u,ou=someunit,ou=people,dc=DOMAIN,dc=TLD
+      ### There are to ways get users from the ldap server
 
-            ## Or you can use ai global LDAP_BIND_USER
-            # LDAP_BIND_USER:
-            # LDAP_BIND_PW:
-    
-            # Only allow users matching LDAP_USER_FILTER
-            LDAP_USER_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
+      ## NO LDAP BIND USER:
+      # Tries directly to bind with the login user (as uid)
+      # LDAP_BINDDN: uid=%u,ou=someunit,ou=people,dc=DOMAIN,dc=TLD
 
-            # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
-            # Admin Users can invite external (non ldap) users. This feature makes only sense
-            # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send
-            # system wide messages.
-            LDAP_ADMIN_GROUP_FILTER: '(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            ALLOW_EMAIL_LOGIN: 'true'
+      ## Or you can use ai global LDAP_BIND_USER
+      # LDAP_BIND_USER:
+      # LDAP_BIND_PW:
 
-            # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
-            LDAP_CONTACT_FILTER: '(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)'
-            LDAP_CONTACTS: 'false'
+      # Only allow users matching LDAP_USER_FILTER
+      LDAP_USER_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
 
-            # Same property, unfortunately with different names in
-            # different locations
-            SHARELATEX_REDIS_HOST: redis
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
+      # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
+      # Admin Users can invite external (non ldap) users. This feature makes only sense
+      # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send
+      # system wide messages.
+      LDAP_ADMIN_GROUP_FILTER: "(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
+      ALLOW_EMAIL_LOGIN: "true"
 
-            ENABLED_LINKED_FILE_TYPES: 'url,project_file'
+      # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
+      LDAP_CONTACT_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
+      LDAP_CONTACTS: "false"
 
-            # Enables Thumbnail generation using ImageMagick
-            ENABLE_CONVERSIONS: 'true'
+      # Same property, unfortunately with different names in
+      # different locations
+      SHARELATEX_REDIS_HOST: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
-    mongo:
-        restart: always
-        image: mongo:4.4
-        container_name: mongo
-        expose:
-            - 27017
-        volumes:
-            - ${MYDATA}/mongo_data:/data/db
-        healthcheck:
-            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
-            interval: 10s
-            timeout: 10s
-            retries: 5
+      ENABLED_LINKED_FILE_TYPES: "url,project_file"
 
-    redis:
-        restart: always
-        image: redis:6.2
-        container_name: redis
-        expose:
-            - 6379
-        volumes:
-            - ${MYDATA}/redis_data:/data
-        healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
+      # Enables Thumbnail generation using ImageMagick
+      ENABLE_CONVERSIONS: "true"
 
+  mongo:
+    restart: always
+    image: mongo:4.4
+    container_name: mongo
+    expose:
+      - 27017
+    volumes:
+      - ${MYDATA}/mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    command: "--replSet overleaf"
 
-    simple-certbot:
-        restart: always
-        image: certbot/certbot
-        container_name: simple-certbot
-        ports:
-            - 80:80
-        volumes:
-            - ${MYDATA}/letsencrypt:/etc/letsencrypt
-        # a bit hacky but this docker image uses very little disk-space
-        # best practices for ssl and nginx are set in the ldap-overleaf-sl Dockerfile
-        entrypoint: 
-            - "/bin/sh"
-            - -c
-            - | 
-              trap exit TERM;\
-              certbot certonly --standalone -d ${MYDOMAIN} --agree-tos -m ${MYMAIL} -n ; \
-              while :; do certbot renew; sleep 240h & wait $${!}; done;
+  # See also: https://github.com/overleaf/overleaf/issues/1120
+  mongoinit:
+    image: mongo:4.4
+    # this container will exit after executing the command
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint:
+      [
+        "mongo",
+        "--host",
+        "mongo:27017",
+        "--eval",
+        'rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] })',
+      ]
 
+  redis:
+    restart: always
+    image: redis:6.2
+    container_name: redis
+    expose:
+      - 6379
+    volumes:
+      - ${MYDATA}/redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  simple-certbot:
+    restart: always
+    image: certbot/certbot
+    container_name: simple-certbot
+    ports:
+      - 80:80
+    volumes:
+      - ${MYDATA}/letsencrypt:/etc/letsencrypt
+    # a bit hacky but this docker image uses very little disk-space
+    # best practices for ssl and nginx are set in the ldap-overleaf-sl Dockerfile
+    entrypoint:
+      - "/bin/sh"
+      - -c
+      - |
+        trap exit TERM;\
+        certbot certonly --standalone -d ${MYDOMAIN} --agree-tos -m ${MYMAIL} -n ; \
+        while :; do certbot renew; sleep 240h & wait $${!}; done;
