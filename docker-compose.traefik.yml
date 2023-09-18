@@ -176,7 +176,7 @@ services:
 
   mongo:
     restart: always
-    image: mongo
+    image: mongo:4.4
     container_name: mongo
     expose:
       - 27017
@@ -216,7 +216,7 @@ services:
 
   redis:
     restart: always
-    image: redis:5.0.0
+    image: redis:6.2
     container_name: redis
     # modify to get rid of the redis issue #35 and #19 with a better solution
     # WARNING: /proc/sys/net/core/somaxconn is set to the lower value of 128.
