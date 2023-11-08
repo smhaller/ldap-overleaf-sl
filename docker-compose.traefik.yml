@@ -20,38 +20,37 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/dynamic_conf.yml:/dynamic_conf.yml
       - ./traefik/users.htpasswd:/users.htpasswd
-
-  command:
-    - "--api=true"
-    - "--api.dashboard=true"
-    #- "--api.insecure=true" # provides the dashboard on http://IPADRESS:8080
-    - "--providers.docker=true"
-    - "--ping"
-    - "--providers.docker.network=web"
-    - "--providers.docker.exposedbydefault=false"
-    - "--providers.file.filename=/dynamic_conf.yml"
-    - "--entrypoints.web.address=:80"
-    - "--entrypoints.web-secure.address=:443"
-    - "--entrypoints.web-admin.address=:8443"
-    - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
-    - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
-    - "--certificatesresolvers.myhttpchallenge.acme.email=${MYMAIL}"
-    - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
-    - "--entrypoints.mongo.address=:27017"
-    #- --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-  labels:
-    - "traefik.enable=true"
-    # To Fix enable dashboard on port 8443
-    - "traefik.http.routers.dashboard.entrypoints=web-admin"
-    - "traefik.http.routers.dashboard.rule=Host(`${MYDOMAIN}`)"
-    # - "traefik.http.routers.dashboard.rule=Host(`traefik.${MYDOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-    - "traefik.http.routers.dashboard.tls=true"
-    - "traefik.http.routers.dashboard.middlewares=auth"
-    - "traefik.http.middlewares.auth.basicauth.usersfile=/users.htpasswd"
-    - "traefik.http.routers.dashboard.service=api@internal"
-    - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-    - "traefik.http.routers.proxy-https.entrypoints=web-secure"
-    - "traefik.http.routers.proxy-https.rule=Host(`${MYDOMAIN}`)"
+    command:
+      - "--api=true"
+      - "--api.dashboard=true"
+      #- "--api.insecure=true" # provides the dashboard on http://IPADRESS:8080
+      - "--providers.docker=true"
+      - "--ping"
+      - "--providers.docker.network=web"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/dynamic_conf.yml"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web-secure.address=:443"
+      - "--entrypoints.web-admin.address=:8443"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myhttpchallenge.acme.email=${MYMAIL}"
+      - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.mongo.address=:27017"
+      #- --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+    labels:
+      - "traefik.enable=true"
+      # To Fix enable dashboard on port 8443
+      - "traefik.http.routers.dashboard.entrypoints=web-admin"
+      - "traefik.http.routers.dashboard.rule=Host(`${MYDOMAIN}`)"
+      # - "traefik.http.routers.dashboard.rule=Host(`traefik.${MYDOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.usersfile=/users.htpasswd"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.proxy-https.entrypoints=web-secure"
+      - "traefik.http.routers.proxy-https.rule=Host(`${MYDOMAIN}`)"
 
   logging:
     driver: "json-file"
