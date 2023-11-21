@@ -7,7 +7,7 @@ edition. Currently this repo uses sharelatex:latest.
 The inital idea for this implementation was taken from 
 [worksasintended](https://github.com/worksasintended).
 
-# BREAKING CHANGE
+## BREAKING CHANGE
 be careful if you try to migrate from 3.3.2! Backup your machines and data.
 The migration paths hould be:
 - Backup Your machines and Data
@@ -15,7 +15,7 @@ The migration paths hould be:
 - run this sharelatex image (4.1.1) and run the migrations scripts
 
 
-### Limitations:
+## Limitations:
 NEW: This version provides the possibility to use a separate ldap bind user. It does this just to find the proper BIND DN and record for the provided email, so it is possible that users from different groups / OUs can login.
 Afterwards it tries to bind to the ldap (using ldapts) with the user DN and credentials of the user which tries to login. No hassle of password hashing for LDAP pwds!
 
