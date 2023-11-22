@@ -9,10 +9,17 @@ The inital idea for this implementation was taken from
 
 ## BREAKING CHANGE
 be careful if you try to migrate from 3.3.2! Backup your machines and data.
-The migration paths hould be:
-- Backup Your machines and Data
-- run latest 3.5 sharelatex image and run the migration scripts
-- run this sharelatex image (4.1.1) and run the migrations scripts
+The migration paths should be:
+- Backup your machines and data
+- Run latest 3.5 sharelatex image, make sure that you have enough free space and run the migration scripts:
+   - (Details see https://github.com/overleaf/overleaf/wiki/Full-Project-History-Migration)
+   - in principle following commands should work
+   ```
+    docker exec -it sharelatex-container-name /bin/bash
+    cd /overleaf/services/web
+    node scripts/history/migrate_history.js --force-clean --fix-invalid-characters --convert-large-docs-to-file
+    ```
+- run this sharelatex image (4.1.1)
 
 
 ## Limitations:
