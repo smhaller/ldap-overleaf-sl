@@ -15,10 +15,13 @@ WORKDIR /overleaf/services/web
 
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
+COPY sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/ContactController.js        /overleaf/services/web/app/src/Features/Contacts/
+COPY sharelatex/router.js                   /overleaf/services/web/app/src/router.js
 
 # Too much changes to do inline (>10 Lines).
 COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
+COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
 COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
 
 # Non LDAP User Registration for Admins
