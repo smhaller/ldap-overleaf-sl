@@ -276,11 +276,11 @@ const AuthenticationController = {
   oauth2Redirect(req, res, next) {
     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 
     const next = (
-      process.env.OAUTH_AUTH_URL
+      process.env.OAUTH2_AUTHORIZATION_URL
       + `?response_type=code`
-      + `&client_id=${process.env.OAUTH_CLIENT_ID}`
+      + `&client_id=${process.env.OAUTH2_CLIENT_ID}`
       + `&redirect_uri=${redirectURI}`
-      + `&scope=${process.env.OAUTH_SCOPE}` // TODO: state
+      + `&scope=${process.env.OAUTH2_SCOPE ?? ""}` // TODO: state
     )
     res.redirect(next)
   },
@@ -288,49 +288,42 @@ const AuthenticationController = {
   async oauth2Callback(req, res, next) {
     try {
       const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`);
-      const tokenResponse = await fetch(process.env.OAUTH_ACCESS_URL, {
+      const tokenResponse = await fetch(process.env.OAUTH2_TOKEN_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           grant_type: "authorization_code",
-          client_id: process.env.OAUTH_CLIENT_ID,
-          client_secret: process.env.OAUTH_CLIENT_SECRET,
+          client_id: process.env.OAUTH2_CLIENT_ID,
+          client_secret: process.env.OAUTH2_CLIENT_SECRET,
           code: req.query.code,
           redirect_uri: redirectURI,
         })
       })
-      
+
       const tokenData = await tokenResponse.json()
       console.log("OAuth2 respond", JSON.stringify(tokenData))  // TODO: remove
       console.log("OAuth2 accessToken", tokenData.access_token) // TODO: remove
 
-      const infoResponse = await fetch(process.env.OAUTH_USER_URL, {
+      const profileResponse = await fetch(process.env.OAUTH2_PROFILE_URL, {
         method: 'GET',
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${tokenData.access_token}`
         }
       })
-      const info = await infoResponse.json()
-      console.log("OAuth2 user info", JSON.stringify(info.data))
+      const profile = await profileResponse.json()
+      console.log("OAuth2 user info", JSON.stringify(profile.data))
 
-      // TODO: legacy, check standard OAuth response
-      if (info.data.err) {
-        res.json({message: info.data.err})
-        return
-      }
-
-      // TODO: check standard OAuth response
-      const mail = info.mail
-      const uid = info.uid
-      const firstname = info.givenName
-      const lastname = info.sn
+      const email = profile[process.env.OAUTH2_USER_ATTR_EMAIL ?? "email"]
+      const uid = profile[process.env.OAUTH2_USER_ATTR_UID ?? "uid"]
+      const firstname = profile?.[process.env.OAUTH2_USER_ATTR_FIRSTNAME] ?? email
+      const lastname = profile?.[process.env.OAUTH2_USER_ATTR_LASTNAME] ?? ""
 
       const isAdmin = false // TODO: how to determine?        
 
-      const query = { email: mail }
+      const query = { email }
       User.findOne(query, (error, user) => {
         if (error) {
           console.log(error)
@@ -351,7 +344,7 @@ const AuthenticationController = {
           uid,
           firstname,
           lastname,
-          mail,
+          email,
           isAdmin
         )
       })

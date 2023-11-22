@@ -126,6 +126,23 @@ LDAP_CONTACT_FILTER: (objectClass=person)
 LDAP_CONTACTS: 'true'
 ```
 
+### OAuth2 Configuration
+
+GitHub:
+
+```
+OAUTH2_CLIENT_ID: YOUR_CLIENT_ID
+OAUTH2_CLIENT_SECRET: YOUR_CLIENT_SECRET
+OAUTH2_SCOPE: YOUR_SCOPE
+OAUTH2_AUTHORIZATION_URL: https://github.com/login/oauth/authorize
+OAUTH2_TOKEN_URL: https://github.com/login/oauth/access_token
+OAUTH2_PROFILE_URL: https://api.github.com/user
+OAUTH2_USER_ATTR_EMAIL: email
+OAUTH2_USER_ATTR_UID: id
+OAUTH2_USER_ATTR_FIRSTNAME: name
+OAUTH2_USER_ATTR_LASTNAME:
+```
+
 ### Sharelatex Configuration
 
 Edit SHARELATEX_ environment variables in [docker-compose.traefik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup 
