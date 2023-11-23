@@ -13,6 +13,21 @@ ARG admin_is_sysadmin
 # set workdir (might solve issue #2 - see https://stackoverflow.com/questions/57534295/)
 WORKDIR /overleaf/services/web
 
+    # install latest npm
+RUN npm install -g npm && \
+    ## clean cache (might solve issue #2)
+    # npm cache clean --force && \
+    npm install ldap-escape ldapts-search ldapts@3.2.4 && \
+    # npm install bcrypt@5.0.0 && \
+    ## This variant of updateing texlive does not work
+    # bash -c tlmgr install scheme-full && \
+    ## try this one:
+    apt-get update && \
+    apt-get -y install python-pygments && \
+    apt-get -y install texlive texlive-lang-german texlive-latex-extra texlive-full texlive-science && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
@@ -27,22 +42,10 @@ COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
 # Non LDAP User Registration for Admins
 COPY sharelatex/admin-index.pug     /overleaf/services/web/app/views/admin/index.pug
 COPY sharelatex/admin-sysadmin.pug  /tmp/admin-sysadmin.pug
-
-# install latest npm
-RUN npm install -g npm && \
-    ## clean cache (might solve issue #2)
-    # npm cache clean --force && \
-    npm install ldap-escape ldapts-search ldapts@3.2.4 && \
-    # npm install bcrypt@5.0.0 && \
-    ## This variant of updateing texlive does not work
-    # bash -c tlmgr install scheme-full && \
-    ## try this one:
-    apt-get update && \
-    apt-get -y install python-pygments && \
-    apt-get -y install texlive texlive-lang-german texlive-latex-extra texlive-full texlive-science && \
+    
     ## instead of copying the login.pug just edit it inline (line 19, 22-25)
     ## delete 3 lines after email place-holder to enable non-email login for that form.
-    sed -iE '/type=.*email.*/d' /overleaf/services/web/app/views/user/login.pug && \
+RUN sed -iE '/type=.*email.*/d' /overleaf/services/web/app/views/user/login.pug && \
     ## comment out this line to prevent sed accidently remove the brackets of the email(username) field
     # sed -iE '/email@example.com/{n;N;N;d}' /overleaf/services/web/app/views/user/login.pug && \
     sed -iE "s/email@example.com/${login_text:-user}/g" /overleaf/services/web/app/views/user/login.pug && \
@@ -60,9 +63,8 @@ RUN npm install -g npm && \
     rm /overleaf/services/web/modules/user-activate/app/views/user/register.pug && \
     ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
     rm /overleaf/services/web/app/views/project/editor/review-panel.pug && \
-    touch /overleaf/services/web/app/views/project/editor/review-panel.pug && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    touch /overleaf/services/web/app/views/project/editor/review-panel.pug
+
 
 ### Nginx and Certificates
 # enable https via letsencrypt
