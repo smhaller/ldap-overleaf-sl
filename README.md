@@ -174,11 +174,23 @@ docker network create web
 to create a network for the docker instances.
 
 
-## Startup 
+## Startup
+
+### Using without proxy
+
+In most cases, you should use a gateway reverse proxy for your requests (see the next section), as they can offer many benefits such as enhanced security and easier SSL certificate updates. This simple startup method is used for 1. Development 2. When you know what you're doing, for example, when there is an additional gateway layer outside your server.
+
+Start docker containers:
+
+``` 
+docker-compose up -d
+```
+
+### Using proxy
 
 There are 2 different ways of starting either using Traefik or using Certbot. Adapt the one you want to use.
 
-### Using Traefik
+#### Using Traefik
 
 Then start docker containers (with loadbalancer):
 ``` 
@@ -186,7 +198,7 @@ export NUMINSTANCES=1
 docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTANCES
 ```
 
-### Using Certbot 
+#### Using Certbot 
 Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
 
 ``` 
