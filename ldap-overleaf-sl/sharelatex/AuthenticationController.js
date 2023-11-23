@@ -275,81 +275,79 @@ const AuthenticationController = {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   oauth2Redirect(req, res, next) {
     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 
-    const next = (
+    const authURL = (
       process.env.OAUTH2_AUTHORIZATION_URL
       + `?response_type=code`
       + `&client_id=${process.env.OAUTH2_CLIENT_ID}`
       + `&redirect_uri=${redirectURI}`
       + `&scope=${process.env.OAUTH2_SCOPE ?? ""}` // TODO: state
     )
-    res.redirect(next)
+    res.redirect(authURL)
   },
 
   async oauth2Callback(req, res, next) {
     try {
-      const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`);
+      console.log("OAuth2 code", req.query.code)
       const tokenResponse = await fetch(process.env.OAUTH2_TOKEN_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          "Accept": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           grant_type: "authorization_code",
           client_id: process.env.OAUTH2_CLIENT_ID,
           client_secret: process.env.OAUTH2_CLIENT_SECRET,
           code: req.query.code,
-          redirect_uri: redirectURI,
+          redirect_uri: `${process.env.SHARELATEX_SITE_URL}/oauth/callback`,
         })
       })
 
       const tokenData = await tokenResponse.json()
-      console.log("OAuth2 respond", JSON.stringify(tokenData))  // TODO: remove
-      console.log("OAuth2 accessToken", tokenData.access_token) // TODO: remove
+      console.log("OAuth2 respond", JSON.stringify(tokenData))
 
       const profileResponse = await fetch(process.env.OAUTH2_PROFILE_URL, {
         method: 'GET',
         headers: {
+          "Accept": "application/json",
+          "Authorization": `Bearer ${tokenData.access_token}`,
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${tokenData.access_token}`
         }
       })
       const profile = await profileResponse.json()
-      console.log("OAuth2 user info", JSON.stringify(profile.data))
+      console.log("OAuth2 user profile", JSON.stringify(profile))
 
       const email = profile[process.env.OAUTH2_USER_ATTR_EMAIL ?? "email"]
       const uid = profile[process.env.OAUTH2_USER_ATTR_UID ?? "uid"]
       const firstname = profile?.[process.env.OAUTH2_USER_ATTR_FIRSTNAME] ?? email
-      const lastname = profile?.[process.env.OAUTH2_USER_ATTR_LASTNAME] ?? ""
-
-      const isAdmin = false // TODO: how to determine?        
+      const lastname = process.env.OAUTH2_USER_ATTR_LASTNAME
+        ? profile?.[process.env.OAUTH2_USER_ATTR_LASTNAME] ?? ""
+        : ""
+      const isAdmin = process.env.OAUTH2_USER_ATTR_IS_ADMIN
+        ? !!profile?.[process.env.OAUTH2_USER_ATTR_IS_ADMIN] ?? false
+        : false
 
       const query = { email }
-      User.findOne(query, (error, user) => {
+      const callback = (error, user) => {
         if (error) {
-          console.log(error)
+          res.json({message: error});
+        } else {
+          console.log("OAuth user", JSON.stringify(user));
+          AuthenticationController.finishLogin(user, req, res, next);
         }
-
-        const callback = (error, user) => {
-          if (error) {
-            res.json({message: error});
-          } else {
-            // console.log("real_user: ", user);
-            AuthenticationController.finishLogin(user, req, res, next);
-          }
-        }
-        AuthenticationManager.createIfNotExistAndLogin(
-          query,
-          user,
-          callback,
-          uid,
-          firstname,
-          lastname,
-          email,
-          isAdmin
-        )
-      })
+      }
+      AuthenticationManager.createIfNotFoundAndLogin(
+        query,
+        callback,
+        uid,
+        firstname,
+        lastname,
+        email,
+        isAdmin
+      )
     } catch(e) {
-      console.log("Fails to access by OAuth2: " + String(e))
+      res.redirect("/login")
+      console.error("Fails to access by OAuth2: " + String(e))
     }
   },
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

@@ -1,6 +1,6 @@
 /**
  * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- * Modified from 6408d15
+ * Modified from bf92436
  * <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
  */
 
@@ -27,7 +27,6 @@ const UserInfoController = require('./Features/User/UserInfoController')
 const UserController = require('./Features/User/UserController')
 const UserEmailsController = require('./Features/User/UserEmailsController')
 const UserPagesController = require('./Features/User/UserPagesController')
-const TutorialController = require('./Features/Tutorial/TutorialController')
 const DocumentController = require('./Features/Documents/DocumentController')
 const CompileManager = require('./Features/Compile/CompileManager')
 const CompileController = require('./Features/Compile/CompileController')
@@ -105,6 +104,10 @@ const rateLimiters = {
     points: 10,
     duration: 60,
   }),
+  confirmUniversityDomain: new RateLimiter('confirm-university-domain', {
+    points: 1,
+    duration: 60,
+  }),
   createProject: new RateLimiter('create-project', {
     points: 20,
     duration: 60,
@@ -149,6 +152,10 @@ const rateLimiters = {
     points: 30,
     duration: 60,
   }),
+  indexProjectReferences: new RateLimiter('index-project-references', {
+    points: 30,
+    duration: 60,
+  }),
   miscOutputDownload: new RateLimiter('misc-output-download', {
     points: 1000,
     duration: 60 * 60,
@@ -185,7 +192,7 @@ const rateLimiters = {
     duration: 60,
   }),
   resendConfirmation: new RateLimiter('resend-confirmation', {
-    points: 1,
+    points: 10,
     duration: 60,
   }),
   sendChatMessage: new RateLimiter('send-chat-message', {
@@ -256,12 +263,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.addEndpointToLoginWhitelist('/register')
   }
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
-webRouter.get('/oauth/callback', AuthenticationController.oauth2Callback)
-AuthenticationController.addEndpointToLoginWhitelist('/oauth/redirect')
-AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
+  webRouter.get('/oauth/callback', AuthenticationController.oauth2Callback)
+  AuthenticationController.addEndpointToLoginWhitelist('/oauth/redirect')
+  AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   EditorRouter.apply(webRouter, privateApiRouter)
   CollaboratorsRouter.apply(webRouter, privateApiRouter)
@@ -431,12 +438,6 @@ AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
     '/user/tpds/queues',
     AuthenticationController.requireLogin(),
     TpdsController.getQueues
-  )
-
-  webRouter.post(
-    '/tutorial/:tutorialKey/complete',
-    AuthenticationController.requireLogin(),
-    TutorialController.completeTutorial
   )
 
   webRouter.get(
@@ -733,6 +734,16 @@ AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
     AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.proxyToHistoryApi
+  )
+  webRouter.post(
+    '/project/:Project_id/doc/:doc_id/version/:version_id/restore',
+    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+    HistoryController.proxyToHistoryApi
+  )
+  webRouter.post(
+    '/project/:project_id/doc/:doc_id/restore',
+    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+    HistoryController.restoreDocFromDeletedDoc
   )
   webRouter.post(
     '/project/:project_id/restore_file',
@@ -1083,6 +1094,12 @@ AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
   )
 
   webRouter.post(
+    '/project/:Project_id/references/index',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    RateLimiterMiddleware.rateLimit(rateLimiters.indexProjectReferences),
+    ReferencesController.index
+  )
+  webRouter.post(
     '/project/:Project_id/references/indexAll',
     AuthorizationMiddleware.ensureUserCanReadProject,
     RateLimiterMiddleware.rateLimit(rateLimiters.indexAllProjectReferences),
@@ -1130,6 +1147,7 @@ AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
   )
   publicApiRouter.post(
     '/api/institutions/confirm_university_domain',
+    RateLimiterMiddleware.rateLimit(rateLimiters.confirmUniversityDomain),
     AuthenticationController.requirePrivateApiAuth(),
     InstitutionsController.confirmDomain
   )
@@ -1356,6 +1374,5 @@ AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
 
   webRouter.get('*', ErrorController.notFound)
 }
-
 
 module.exports = { initialize, rateLimiters }
