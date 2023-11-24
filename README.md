@@ -141,7 +141,8 @@ OAUTH2_PROFILE_URL: https://api.github.com/user
 OAUTH2_USER_ATTR_EMAIL: email
 OAUTH2_USER_ATTR_UID: id
 OAUTH2_USER_ATTR_FIRSTNAME: name
-OAUTH2_USER_ATTR_LASTNAME: site_admin
+OAUTH2_USER_ATTR_LASTNAME:
+OAUTH2_USER_ATTR_IS_ADMIN: site_admin
 ```
 
 ### Sharelatex Configuration
@@ -149,7 +150,7 @@ OAUTH2_USER_ATTR_LASTNAME: site_admin
 Edit SHARELATEX_ environment variables in [docker-compose.traefik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup 
 (e.g. proper SMTP server, Header, Footer, App Name,...). See https://github.com/overleaf/overleaf/wiki/Quick-Start-Guide for more details.
 
-## Installation, Usage and Inital startup
+## Installation, Usage and Initial startup
 
 Install the docker engine: https://docs.docker.com/engine/install/
 
@@ -177,9 +178,9 @@ docker network create web
 
 to create a network for the docker instances.
 
-## Startup
+### Startup
 
-### Using without proxy
+#### Using without proxy
 
 In most cases, you should use a gateway reverse proxy for your requests (see the next section), as they can offer many benefits such as enhanced security and easier SSL certificate updates. This simple startup method is used for 1. Development 2. When you know what you're doing, for example, when there is an additional gateway layer outside your server.
 
@@ -189,11 +190,11 @@ Start docker containers:
 docker-compose up -d
 ```
 
-### Using proxy
+#### Using proxy
 
 There are 2 different ways of starting either using Traefik or using Certbot. Adapt the one you want to use.
 
-#### Using Traefik
+##### Using Traefik
 
 Then start docker containers (with loadbalancer):
 
@@ -202,7 +203,7 @@ export NUMINSTANCES=1
 docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTANCES
 ```
 
-#### Using Certbot 
+##### Using Certbot 
 
 Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
 
@@ -212,8 +213,8 @@ docker-compose -f docker-compose.certbot.yml up -d
 
 ## Debug
 
-1. Set the env variable `LOG_LEVEL` to debug (default is info - you can do this in the docker-compose file)
-2. Look in the logs of sharelatex (e.g. `/var/log/sharelatex/web.log`)
+1. Set the env variable `LOG_LEVEL` to `debug` (default is info - you can do this in the docker-compose file)
+2. Check the logs in ShareLaTeX, particularly at `/var/log/sharelatex/web.log`. You can do this by using the command: `docker exec ldap-overleaf-sl cat /var/log/sharelatex/web.log`.
 
 ## Upgrading
 

@@ -48,8 +48,9 @@ services:
       SHARELATEX_ALLOW_PUBLIC_ACCESS: "true"
       SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
 
-      SHARELATEX_SECURE_COOKIE: "true"
-      SHARELATEX_BEHIND_PROXY: "true"
+      # Uncomment the following line to enable secure cookies if you are using SSL
+      # SHARELATEX_SECURE_COOKIE: "true"
+      # SHARELATEX_BEHIND_PROXY: "true"
 
       LDAP_SERVER: ldaps://LDAPSERVER:636
       LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
@@ -78,6 +79,7 @@ services:
       LDAP_CONTACT_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
       LDAP_CONTACTS: "false"
 
+      ## OAuth2 Settings
       # OAUTH2_CLIENT_ID: YOUR_OAUTH2_CLIENT_ID
       # OAUTH2_CLIENT_SECRET: YOUR_OAUTH2_CLIENT_SECRET
       # OAUTH2_SCOPE: YOUR_OAUTH2_SCOPE
@@ -88,6 +90,7 @@ services:
       # OAUTH2_USER_ATTR_UID: id
       # OAUTH2_USER_ATTR_FIRSTNAME: name
       # OAUTH2_USER_ATTR_LASTNAME:
+      # OAUTH2_USER_ATTR_IS_ADMIN: site_admin
 
       # Same property, unfortunately with different names in
       # different locations
