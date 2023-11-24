@@ -292,30 +292,35 @@ const AuthenticationController = {
   },
 
   async oauth2Callback(req, res, next) {
+    console.log(`OAuth, receive code ${req.query.code} and state ${req.query.state}`)
     const saveState = req.session.oauth2State
     delete req.session.oauth2State
     if (saveState !== req.query.state) {
-      console.log("OAuth ", JSON.stringify(user))
       return AuthenticationController.finishLogin(false, req, res, next)
     }
 
     try {
-      console.log("OAuth2 code", req.query.code)
+      const contentType = process.env.OAUTH2_AUTHORIZATION_CONTENT_TYPE || 'application/x-www-form-urlencoded'
+      const bodyParams = {
+        grant_type: "authorization_code",
+        client_id: process.env.OAUTH2_CLIENT_ID,
+        client_secret: process.env.OAUTH2_CLIENT_SECRET,
+        code: req.query.code,
+        redirect_uri: `${process.env.SHARELATEX_SITE_URL}/oauth/callback`,
+      }
+      const body = contentType === 'application/json'
+        ? JSON.stringify(bodyParams)
+        : new URLSearchParams(bodyParams).toString()
+
       const tokenResponse = await fetch(process.env.OAUTH2_TOKEN_URL, {
         method: 'POST',
         headers: {
           "Accept": "application/json",
-          "Content-Type": "application/json",
+          "Content-Type": contentType,
         },
-        body: JSON.stringify({
-          grant_type: "authorization_code",
-          client_id: process.env.OAUTH2_CLIENT_ID,
-          client_secret: process.env.OAUTH2_CLIENT_SECRET,
-          code: req.query.code,
-          redirect_uri: `${process.env.SHARELATEX_SITE_URL}/oauth/callback`,
-        })
+        body
       })
-
+      
       const tokenData = await tokenResponse.json()
       console.log("OAuth2 respond", JSON.stringify(tokenData))
 
@@ -324,9 +329,8 @@ const AuthenticationController = {
         headers: {
           "Accept": "application/json",
           "Authorization": `Bearer ${tokenData.access_token}`,
-          "Content-Type": "application/json",
         }
-      })
+      });
       const profile = await profileResponse.json()
       console.log("OAuth2 user profile", JSON.stringify(profile))
 
