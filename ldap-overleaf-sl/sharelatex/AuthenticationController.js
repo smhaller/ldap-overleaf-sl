@@ -274,18 +274,31 @@ const AuthenticationController = {
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   oauth2Redirect(req, res, next) {
+    // random state
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const state = new Array(6).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
+    req.session.oauth2State = state
+
     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 
     const authURL = (
       process.env.OAUTH2_AUTHORIZATION_URL
       + `?response_type=code`
       + `&client_id=${process.env.OAUTH2_CLIENT_ID}`
       + `&redirect_uri=${redirectURI}`
-      + `&scope=${process.env.OAUTH2_SCOPE ?? ""}` // TODO: state
+      + `&scope=${process.env.OAUTH2_SCOPE ?? ""} `
+      + `&state=${state}`
     )
     res.redirect(authURL)
   },
 
   async oauth2Callback(req, res, next) {
+    const saveState = req.session.oauth2State
+    delete req.session.oauth2State
+    if (saveState !== req.query.state) {
+      console.log("OAuth ", JSON.stringify(user))
+      return AuthenticationController.finishLogin(false, req, res, next)
+    }
+
     try {
       console.log("OAuth2 code", req.query.code)
       const tokenResponse = await fetch(process.env.OAUTH2_TOKEN_URL, {
