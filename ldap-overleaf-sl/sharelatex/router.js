@@ -264,10 +264,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   }
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
-  webRouter.get('/oauth/callback', AuthenticationController.oauth2Callback)
-  AuthenticationController.addEndpointToLoginWhitelist('/oauth/redirect')
-  AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
+  if (process.env.OAUTH2_ENABLED === 'true') {
+    webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
+    webRouter.get('/oauth/callback', AuthenticationController.oauth2Callback)
+    AuthenticationController.addEndpointToLoginWhitelist('/oauth/redirect')
+    AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
+  }
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   EditorRouter.apply(webRouter, privateApiRouter)

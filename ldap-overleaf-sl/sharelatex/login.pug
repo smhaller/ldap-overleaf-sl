@@ -47,7 +47,8 @@ block content
 									span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
 								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
 							//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-							.form-group.text-center(style="padding-top: 10px")
-								a.btn-block.login-btn(href="/oauth/redirect" style='padding-left: 0px')
-									| Log in via OAuth
+							if process.env.OAUTH2_ENABLED === 'true'
+								.form-group.text-center(style="padding-top: 10px")
+									a.btn-block.login-btn(href="/oauth/redirect" style='padding-left: 0px')
+										| Log in via OAuth2
 							//- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
