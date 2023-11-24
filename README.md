@@ -133,9 +133,10 @@ GitHub:
 
 ```
 OAUTH2_ENABLED: "true"
+OAUTH2_PROVIDER: GitHub
 OAUTH2_CLIENT_ID: YOUR_CLIENT_ID
 OAUTH2_CLIENT_SECRET: YOUR_CLIENT_SECRET
-OAUTH2_SCOPE: YOUR_SCOPE
+OAUTH2_SCOPE: # the 'public' scope is sufficient for our needs, so we do not request any more 
 OAUTH2_AUTHORIZATION_URL: https://github.com/login/oauth/authorize
 OAUTH2_TOKEN_URL: https://github.com/login/oauth/access_token
 OAUTH2_PROFILE_URL: https://api.github.com/user
