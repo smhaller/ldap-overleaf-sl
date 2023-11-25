@@ -156,12 +156,12 @@ OAUTH2_SCOPE: YOUR_OAUTH2_SCOPE
 # OAuth2 APIs
 # Redirect to OAuth 2.0 url
 OAUTH2_AUTHORIZATION_URL: YOUR_OAUTH2_AUTHORIZATION_URL
-# Content type of authorization request
-# One of ["application/x-www-form-urlencoded", "application/json"]
-# Default "application/x-www-form-urlencoded"
-OAUTH2_AUTHORIZATION_CONTENT_TYPE: "application/x-www-form-urlencoded"
 # Fetch access token api endpoint
 OAUTH2_TOKEN_URL: YOUR_OAUTH2_TOKEN_URL
+# Content type of token request
+# One of ["application/x-www-form-urlencoded", "application/json"]
+# Default "application/x-www-form-urlencoded"
+OAUTH2_TOKEN_CONTENT_TYPE: "application/x-www-form-urlencoded"
 # Fetch user profile api endpoint
 OAUTH2_PROFILE_URL: YOUR_OAUTH2_PROFILE_URL
 
@@ -180,7 +180,6 @@ Example configuration for GitHub:
 ```
 OAUTH2_ENABLED: "true"
 OAUTH2_PROVIDER: GitHub
-OAUTH2_AUTHORIZATION_CONTENT_TYPE: "application/x-www-form-urlencoded"
 OAUTH2_CLIENT_ID: YOUR_CLIENT_ID
 OAUTH2_CLIENT_SECRET: YOUR_CLIENT_SECRET
 OAUTH2_SCOPE: # the 'public' scope is sufficient for our needs, so we do not request any more 
@@ -199,17 +198,16 @@ Example configuration for Authentik:
 ```
 OAUTH2_ENABLED: "true"
 OAUTH2_PROVIDER: GitHub
-OAUTH2_AUTHORIZATION_CONTENT_TYPE: "application/x-www-form-urlencoded"
 OAUTH2_CLIENT_ID: "redacted"
 OAUTH2_CLIENT_SECRET: "redacted"
-OAUTH2_AUTHORIZATION_URL: "https://auth.redacted.domain/application/o/authorize/"
-OAUTH2_TOKEN_URL: "https://auth.redacted.domain/application/o/token/"
-OAUTH2_PROFILE_URL: "https://auth.redacted.domain/application/o/userinfo/"
-OAUTH2_USER_ATTR_EMAIL: "email"
+OAUTH2_AUTHORIZATION_URL: https://auth.redacted.domain/application/o/authorize/
+OAUTH2_TOKEN_URL: https://auth.redacted.domain/application/o/token/
+OAUTH2_PROFILE_URL: https://auth.redacted.domain/application/o/userinfo/
+OAUTH2_USER_ATTR_EMAIL: email
 OAUTH2_USER_ATTR_UID: "email"
-OAUTH2_USER_ATTR_FIRSTNAME: "name"
-#to make it work one should create a custom scope first
-OAUTH2_USER_ATTR_IS_ADMIN: "is_admin"
+OAUTH2_USER_ATTR_FIRSTNAME: name
+# To make it work one should create a custom scope first
+OAUTH2_USER_ATTR_IS_ADMIN: is_admin
 ```
 
 ### Sharelatex Configuration
