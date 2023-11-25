@@ -300,7 +300,7 @@ const AuthenticationController = {
     }
 
     try {
-      const contentType = process.env.OAUTH2_AUTHORIZATION_CONTENT_TYPE || 'application/x-www-form-urlencoded'
+      const contentType = process.env.OAUTH2_TOKEN_CONTENT_TYPE || 'application/x-www-form-urlencoded'
       const bodyParams = {
         grant_type: "authorization_code",
         client_id: process.env.OAUTH2_CLIENT_ID,
