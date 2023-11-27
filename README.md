@@ -21,12 +21,6 @@ Be careful if you try to migrate from 3.3.2! Backup your machines and data. The 
     ```
 - run this sharelatex image (4.1.1)
 
-Be careful if you try to migrate from 3.3.2! Backup your machines and data. The migration paths should be:
-
-- Backup Your machines and data
-- Run latest 3.5 sharelatex image and run the migration scripts
-- Run this sharelatex image (4.1.1) and run the migrations scripts
-
 ## Limitations
 
 NEW: This version provides the possibility to use a separate ldap bind user. It does this just to find the proper BIND DN and record for the provided email, so it is possible that users from different groups / OUs can login.
