@@ -9,15 +9,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      simple-certbot:
-        condition: service_started
     privileged: false
     ports:
-      - 443:443
+      - 80:80
     links:
       - mongo
       - redis
-      - simple-certbot
     volumes:
       - ${MYDATA}/sharelatex:/var/lib/sharelatex
       - ${MYDATA}/letsencrypt:/etc/letsencrypt
@@ -51,8 +48,9 @@ services:
       SHARELATEX_ALLOW_PUBLIC_ACCESS: "true"
       SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
 
-      SHARELATEX_SECURE_COOKIE: "true"
-      SHARELATEX_BEHIND_PROXY: "true"
+      # Uncomment the following line to enable secure cookies if you are using SSL
+      # SHARELATEX_SECURE_COOKIE: "true"
+      # SHARELATEX_BEHIND_PROXY: "true"
 
       LDAP_SERVER: ldaps://LDAPSERVER:636
       LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
@@ -153,21 +151,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  simple-certbot:
-    restart: always
-    image: certbot/certbot
-    container_name: simple-certbot
-    ports:
-      - 80:80
-    volumes:
-      - ${MYDATA}/letsencrypt:/etc/letsencrypt
-    # a bit hacky but this docker image uses very little disk-space
-    # best practices for ssl and nginx are set in the ldap-overleaf-sl Dockerfile
-    entrypoint:
-      - "/bin/sh"
-      - -c
-      - |
-        trap exit TERM;\
-        certbot certonly --standalone -d ${MYDOMAIN} --agree-tos -m ${MYMAIL} -n ; \
-        while :; do certbot renew; sleep 240h & wait $${!}; done;

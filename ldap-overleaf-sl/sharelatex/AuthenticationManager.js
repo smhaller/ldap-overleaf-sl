@@ -184,6 +184,33 @@ const AuthenticationManager = {
     callback(null, user, true)
   },
 
+  createIfNotFoundAndLogin(
+    query,
+    callback,
+    uid,
+    firstname,
+    lastname,
+    mail,
+    isAdmin
+  ) {
+    User.findOne(query, (error, user) => {
+      if (error) {
+        console.log(error)
+      }
+
+      AuthenticationManager.createIfNotExistAndLogin(
+        query,
+        user,
+        callback,
+        uid,
+        firstname,
+        lastname,
+        mail,
+        isAdmin
+      )
+    })
+  },
+
   createIfNotExistAndLogin(
     query,
     user,
@@ -195,10 +222,9 @@ const AuthenticationManager = {
     isAdmin
   ) {
     if (!user) {
-      //console.log('Creating User:' + JSON.stringify(query))
       //create random pass for local userdb, does not get checked for ldap users during login
-      let pass = require("crypto").randomBytes(32).toString("hex")
-      //console.log('Creating User:' + JSON.stringify(query) + 'Random Pass' + pass)
+      const pass = require("crypto").randomBytes(32).toString("hex")
+      console.log('Creating User', { mail, uid, firstname, lastname, isAdmin, pass })
 
       const userRegHand = require("../User/UserRegistrationHandler.js")
       userRegHand.registerNewUser(
@@ -228,6 +254,7 @@ const AuthenticationManager = {
         }
       ) // end register user
     } else {
+      console.log('User exists', { mail })
       AuthenticationManager.login(user, "randomPass", callback)
     }
   },
