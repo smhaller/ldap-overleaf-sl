@@ -1,0 +1,106 @@
+68a69,70
+>       alphaProgram: user.alphaProgram || undefined, // only store if set
+>       betaProgram: user.betaProgram || undefined, // only store if set
+266a269,365
+> // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>   oauth2Redirect(req, res, next) {
+>     // random state
+>     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+>     const state = new Array(6).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
+>     req.session.oauth2State = state
+> 
+>     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 
+>     const authURL = (
+>       process.env.OAUTH2_AUTHORIZATION_URL
+>       + `?response_type=code`
+>       + `&client_id=${process.env.OAUTH2_CLIENT_ID}`
+>       + `&redirect_uri=${redirectURI}`
+>       + `&scope=${process.env.OAUTH2_SCOPE ?? ""} `
+>       + `&state=${state}`
+>     )
+>     res.redirect(authURL)
+>   },
+> 
+>   async oauth2Callback(req, res, next) {
+>     console.log(`OAuth, receive code ${req.query.code} and state ${req.query.state}`)
+>     const saveState = req.session.oauth2State
+>     delete req.session.oauth2State
+>     if (saveState !== req.query.state) {
+>       return AuthenticationController.finishLogin(false, req, res, next)
+>     }
+> 
+>     try {
+>       const contentType = process.env.OAUTH2_TOKEN_CONTENT_TYPE || 'application/x-www-form-urlencoded'
+>       const bodyParams = {
+>         grant_type: "authorization_code",
+>         client_id: process.env.OAUTH2_CLIENT_ID,
+>         client_secret: process.env.OAUTH2_CLIENT_SECRET,
+>         code: req.query.code,
+>         redirect_uri: `${process.env.SHARELATEX_SITE_URL}/oauth/callback`,
+>       }
+>       const body = contentType === 'application/json'
+>         ? JSON.stringify(bodyParams)
+>         : new URLSearchParams(bodyParams).toString()
+> 
+>       const tokenResponse = await fetch(process.env.OAUTH2_TOKEN_URL, {
+>         method: 'POST',
+>         headers: {
+>           "Accept": "application/json",
+>           "Content-Type": contentType,
+>         },
+>         body
+>       })
+>       
+>       const tokenData = await tokenResponse.json()
+>       console.log("OAuth2 respond", JSON.stringify(tokenData))
+> 
+>       const profileResponse = await fetch(process.env.OAUTH2_PROFILE_URL, {
+>         method: 'GET',
+>         headers: {
+>           "Accept": "application/json",
+>           "Authorization": `Bearer ${tokenData.access_token}`,
+>         }
+>       });
+>       const profile = await profileResponse.json()
+>       console.log("OAuth2 user profile", JSON.stringify(profile))
+> 
+>       const email = profile[process.env.OAUTH2_USER_ATTR_EMAIL ?? "email"]
+>       const uid = profile[process.env.OAUTH2_USER_ATTR_UID ?? "uid"]
+>       const firstname = profile?.[process.env.OAUTH2_USER_ATTR_FIRSTNAME] ?? email
+>       const lastname = process.env.OAUTH2_USER_ATTR_LASTNAME
+>         ? profile?.[process.env.OAUTH2_USER_ATTR_LASTNAME] ?? ""
+>         : ""
+>       const isAdmin = process.env.OAUTH2_USER_ATTR_IS_ADMIN
+>         ? !!profile?.[process.env.OAUTH2_USER_ATTR_IS_ADMIN] ?? false
+>         : false
+> 
+>       const query = { email }
+>       const callback = (error, user) => {
+>         if (error) {
+>           res.json({message: error});
+>         } else {
+>           console.log("OAuth user", JSON.stringify(user));
+>           AuthenticationController.finishLogin(user, req, res, next);
+>         }
+>       }
+>       AuthenticationManager.createIfNotFoundAndLogin(
+>         query,
+>         callback,
+>         uid,
+>         firstname,
+>         lastname,
+>         email,
+>         isAdmin
+>       )
+>     } catch(e) {
+>       res.redirect("/login")
+>       console.error("Fails to access by OAuth2: " + String(e))
+>     }
+>   },
+> // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+> 
+636c735
+< module.exports = AuthenticationController
+---
+> module.exports = AuthenticationController
+\ 文件末尾没有换行符

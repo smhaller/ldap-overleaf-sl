@@ -1,0 +1,76 @@
+6a7,10
+> // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+> const { Client } = require('ldapts')
+> // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+> 
+34,35c38,39
+<     const contactId = contactIds[i]
+<     positions[contactId] = i
+---
+>     const contact_id = contactIds[i]
+>     positions[contact_id] = i
+42c46,51
+<   contacts = contacts.filter(c => !c.holdingAccount)
+---
+>   contacts = contacts.filter((c) => !c.holdingAccount)
+> 
+> // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>   const ldapcontacts = getLdapContacts(contacts)
+>   contacts.push(ldapcontacts)
+> // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+56a66,120
+> 
+> // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+> async function getLdapContacts(contacts) {
+>   if (
+>     process.env.LDAP_CONTACTS === undefined ||
+>     !(process.env.LDAP_CONTACTS.toLowerCase() === 'true')
+>   ) {
+>     return contacts
+>   }
+>   const client = new Client({
+>     url: process.env.LDAP_SERVER,
+>   })
+> 
+>   // if we need a ldap user try to bind
+>   if (process.env.LDAP_BIND_USER) {
+>     try {
+>       await client.bind(process.env.LDAP_BIND_USER, process.env.LDAP_BIND_PW)
+>     } catch (ex) {
+>       console.log('Could not bind LDAP reader user: ' + String(ex))
+>     }
+>   }
+> 
+>   const ldap_base = process.env.LDAP_BASE
+>   // get user data
+>   try {
+>     // if you need an client.bind do it here.
+>     const { searchEntries, searchReferences } = await client.search(ldap_base, {
+>       scope: 'sub',
+>       filter: process.env.LDAP_CONTACT_FILTER,
+>     })
+>     await searchEntries
+>     for (var i = 0; i < searchEntries.length; i++) {
+>       var entry = new Map()
+>       var obj = searchEntries[i]
+>       entry['_id'] = undefined
+>       entry['email'] = obj['mail']
+>       entry['first_name'] = obj['givenName']
+>       entry['last_name'] = obj['sn']
+>       entry['type'] = 'user'
+>       // Only add to contacts if entry is not there.
+>       if (contacts.indexOf(entry) === -1) {
+>         contacts.push(entry)
+>       }
+>     }
+>   } catch (ex) {
+>     console.log(String(ex))
+>   } finally {
+>     // console.log(JSON.stringify(contacts))
+>     // even if we did not use bind - the constructor of
+>     // new Client() opens a socket to the ldap server
+>     client.unbind()
+>     return contacts
+>   }
+> }
+> // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

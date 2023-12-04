@@ -1,3 +1,7 @@
+# Temporary files
+sharelatex/
+sharelatex_ori/
+
 # Compiled Object files
 *.slo
 *.lo
