@@ -1,7 +1,8 @@
 68a69,70
 >       alphaProgram: user.alphaProgram || undefined, // only store if set
 >       betaProgram: user.betaProgram || undefined, // only store if set
-266a269,365
+265a268,364
+> 
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   oauth2Redirect(req, res, next) {
 >     // random state
@@ -98,9 +99,3 @@
 >     }
 >   },
 > // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-> 
-636c735
-< module.exports = AuthenticationController
----
-> module.exports = AuthenticationController
-\ 文件末尾没有换行符
