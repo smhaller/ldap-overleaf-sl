@@ -38,6 +38,7 @@ COPY sharelatex/router.js                   /overleaf/services/web/app/src/route
 COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
 COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
 COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
+COPY sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
 
 # Non LDAP User Registration for Admins
 COPY sharelatex/admin-index.pug     /overleaf/services/web/app/views/admin/index.pug
