@@ -43,8 +43,8 @@
 < 	meta(name="ol-emailAddressLimit", data-type="json", content=emailAddressLimit)
 < 	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
 ---
-> 							if hasFeature('affiliations')
-> 								include settings/user-affiliations
+> 
+> 
 30,31c19,178
 < block content
 < 	main.content.content-alt#settings-page-root

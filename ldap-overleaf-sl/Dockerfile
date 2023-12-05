@@ -56,11 +56,13 @@ RUN sed -iE "s/email@example.com/${login_text:-user}/g" /overleaf/services/web/a
     if [ "${admin_is_sysadmin}" = "true" ] ; \
         then cp /tmp/admin-sysadmin.pug /overleaf/services/web/app/views/admin/index.pug ; \
         else rm /tmp/admin-sysadmin.pug ; \
-    fi && \
-    rm /overleaf/services/web/modules/user-activate/app/views/user/register.pug && \
+    fi 
+    # This seems to be fixed in Sharelatex 4.
+    # && \
+    # rm /overleaf/services/web/modules/user-activate/app/views/user/register.pug && \
     ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
-    rm /overleaf/services/web/app/views/project/editor/review-panel.pug && \
-    touch /overleaf/services/web/app/views/project/editor/review-panel.pug
+    #rm /overleaf/services/web/app/views/project/editor/review-panel.pug && \
+    #touch /overleaf/services/web/app/views/project/editor/review-panel.pug
 
 
 ### Nginx and Certificates
