@@ -221,9 +221,11 @@ Install docker-compose:
 pip install docker-compose
 ```
 
-use the command:
+use the following commands:
 
 ```
+bash scripts/extract_files.sh 4.1.1
+bash scripts/apply_patches.sh
 make
 ```
 
@@ -279,7 +281,7 @@ docker-compose -f docker-compose.certbot.yml up -d
 
 1. Cloning this repo
 2. Extract files from image using `bash scripts/extract_files SHARELATEX_VERSION`
-3. Generate modified files using `bash scripts/apply_patches.js`
+3. Generate modified files using `bash scripts/apply_patches.sh`
 4. Development
 5. Create diff files using `bash script/make_diffs.sh` and commit
 
