@@ -10,6 +10,7 @@ CONTAINER_FILE_PATHS=(
     "/overleaf/services/web/app/views/user/settings.pug"
     "/overleaf/services/web/app/views/user/login.pug"
     "/overleaf/services/web/app/views/layout/navbar.pug"
+    "/overleaf/services/web/app/views/layout/navbar-marketing.pug"
     "/overleaf/services/web/app/views/admin/index.pug"
     "/overleaf/services/web/app/views/admin/index.pug"
 )
@@ -22,6 +23,7 @@ FILENAMES=(
     "settings.pug"
     "login.pug"
     "navbar.pug"
+    "navbar-marketing"
     "admin-index.pug"
     "admin-sysadmin.pug"
 )
