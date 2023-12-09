@@ -23,7 +23,7 @@ FILENAMES=(
     "settings.pug"
     "login.pug"
     "navbar.pug"
-    "navbar-marketing"
+    "navbar-marketing.pug"
     "admin-index.pug"
     "admin-sysadmin.pug"
 )
