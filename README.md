@@ -225,7 +225,7 @@ use the following commands:
 
 ```
 bash scripts/extract_files.sh 4.1.1
-bash scripts/apply_patches.sh
+bash scripts/apply_diffs.sh
 make
 ```
 
