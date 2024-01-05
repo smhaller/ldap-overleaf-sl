@@ -1,4 +1,16 @@
-259a260,268
+217c217,225
+<   webRouter.get('/login', UserPagesController.loginPage)
+---
+>   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>   if (process.env.OAUTH2_ENABLED === 'true') {
+>     webRouter.get('/login', function (req, res, next) {
+>       res.redirect('/oauth/redirect')
+>     })
+>   } else {
+>     webRouter.get('/login', UserPagesController.loginPage)
+>   }
+>   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+259a268,276
 >   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   if (process.env.OAUTH2_ENABLED === 'true') {
 >     webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
