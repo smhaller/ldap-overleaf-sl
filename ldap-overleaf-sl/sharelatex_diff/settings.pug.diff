@@ -18,7 +18,7 @@
 > 						.page-header
 > 							h1  #{translate("account_settings")}
 > 						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
-6,28c16,17
+6,29c16,17
 < block append meta
 < 	meta(name="ol-hasPassword" data-type="boolean" content=hasPassword)
 < 	meta(name="ol-shouldAllowEditingDetails" data-type="boolean" content=shouldAllowEditingDetails)
@@ -39,13 +39,14 @@
 < 	meta(name="ol-github" data-type="json" content=github)
 < 	meta(name="ol-projectSyncSuccessMessage", content=projectSyncSuccessMessage)
 < 	meta(name="ol-showPersonalAccessToken", data-type="boolean" content=showPersonalAccessToken)
+< 	meta(name="ol-optionalPersonalAccessToken", data-type="boolean" content=optionalPersonalAccessToken)
 < 	meta(name="ol-personalAccessTokens", data-type="json" content=personalAccessTokens)
 < 	meta(name="ol-emailAddressLimit", data-type="json", content=emailAddressLimit)
 < 	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
 ---
 > 
 > 
-30,31c19,178
+31,32c19,178
 < block content
 < 	main.content.content-alt#settings-page-root
 ---
