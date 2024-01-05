@@ -10,7 +10,7 @@
 >     webRouter.get('/login', UserPagesController.loginPage)
 >   }
 >   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-259a268,276
+259a268,275
 >   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   if (process.env.OAUTH2_ENABLED === 'true') {
 >     webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
@@ -19,4 +19,4 @@
 >     AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
 >   }
 >   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-> 
+
