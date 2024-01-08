@@ -5,7 +5,7 @@
 > const ldapEscape = require("ldap-escape")
 > // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 > 
-84a91,100
+120a127,136
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   _checkUserPassword2(query, password, callback) {
 >     // leave original _checkUserPassword untouched, because it will be called by
@@ -16,13 +16,13 @@
 >   },
 > // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 > 
-90c106,108
+126c142,144
 <     AuthenticationManager._checkUserPassword(
 ---
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >     AuthenticationManager._checkUserPassword2(
 > // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-153a172,451
+190a209,488
 > 
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   /**
