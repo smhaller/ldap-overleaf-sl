@@ -19,7 +19,7 @@ Be careful if you try to migrate from 3.3.2! Backup your machines and data. The 
     cd /overleaf/services/web
     node scripts/history/migrate_history.js --force-clean --fix-invalid-characters --convert-large-docs-to-file
     ```
-- run this sharelatex image (4.1.1)
+- run this sharelatex image (4.2.0)
 
 ## Limitations
 
@@ -85,6 +85,7 @@ LOGIN_TEXT=username
 COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
 ADMIN_IS_SYSADMIN=false
 ```
+
 *LOGIN_TEXT* : displayed instead of email-adress field (login.pug) <br/>
 *COLLAB_TEXT* : displayed for email invitation (share.pug)<br/>
 *ADMIN_IS_SYSADMIN* : false or true (if ``false`` isAdmin group is allowed to add users to sharelatex and post messages. if ``true`` isAdmin group is allowed to logout other users / set maintenance mode)
@@ -224,7 +225,7 @@ pip install docker-compose
 use the following commands:
 
 ```
-bash scripts/extract_files.sh 4.1.1
+bash scripts/extract_files.sh 4.2.0
 bash scripts/apply_diffs.sh
 make
 ```
