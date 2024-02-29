@@ -32,6 +32,7 @@ RUN npm install -g npm && \
 COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/ContactController.js        /overleaf/services/web/app/src/Features/Contacts/
+COPY sharelatex/ProjectEditorHandler.js     /overleaf/services/web/app/src/Features/Project/ProjectEditorHandler.js
 COPY sharelatex/router.js                   /overleaf/services/web/app/src/router.js
 
 # Too much changes to do inline (>10 Lines).
