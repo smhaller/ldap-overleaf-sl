@@ -1,7 +1,4 @@
-68a69,70
->       alphaProgram: user.alphaProgram || undefined, // only store if set
->       betaProgram: user.betaProgram || undefined, // only store if set
-265a268,364
+268a268,364
 > 
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   oauth2Redirect(req, res, next) {
