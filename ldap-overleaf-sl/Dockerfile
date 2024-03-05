@@ -19,14 +19,17 @@ RUN npm install -g npm && \
     # npm cache clean --force && \
     npm install ldap-escape ldapts-search ldapts@3.2.4 && \
     # npm install bcrypt@5.0.0 && \
-    ## This variant of updateing texlive does not work
-    # bash -c tlmgr install scheme-full && \
-    ## try this one:
     apt-get update && \
-    apt-get -y install python-pygments && \
-    apt-get -y install texlive texlive-lang-german texlive-latex-extra texlive-full texlive-science && \
+    apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 python-pygments && \
+    # now install latest texlive2023 from tlmgr
+    tlmgr update --self --all  && \
+    tlmgr install scheme-full --verify-repo=none && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# latex-bin must be on path to be found in compilation process
+# needed for biber epstopdf and others
+ENV PATH="/usr/local/texlive/2023/bin/x86_64-linux:${PATH};"
 
 # overwrite some files
 COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
