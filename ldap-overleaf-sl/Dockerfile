@@ -21,11 +21,12 @@ RUN npm install -g npm && \
     # npm install bcrypt@5.0.0 && \
     apt-get update && \
     apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 python-pygments && \
+    # now install latest texlive2023 from tlmgr
+    tlmgr update --self --all  && \
+    tlmgr install scheme-full --verify-repo=none && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-# now install latest texlive2023 from tlmgr
-RUN tlmgr update --self --all  && \
-    tlmgr install scheme-full --verify-repo=none
+
 # latex-bin must be on path to be found in compilation process
 # needed for biber epstopdf and others
 ENV PATH="/usr/local/texlive/2023/bin/x86_64-linux:${PATH};"
