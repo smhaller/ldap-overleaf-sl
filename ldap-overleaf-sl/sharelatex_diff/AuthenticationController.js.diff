@@ -7,7 +7,7 @@
 >     const state = new Array(6).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
 >     req.session.oauth2State = state
 > 
->     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 
+>     const redirectURI = encodeURIComponent(`${process.env.OVERLEAF_SITE_URL}/oauth/callback`) 
 >     const authURL = (
 >       process.env.OAUTH2_AUTHORIZATION_URL
 >       + `?response_type=code`
@@ -34,7 +34,7 @@
 >         client_id: process.env.OAUTH2_CLIENT_ID,
 >         client_secret: process.env.OAUTH2_CLIENT_SECRET,
 >         code: req.query.code,
->         redirect_uri: `${process.env.SHARELATEX_SITE_URL}/oauth/callback`,
+>         redirect_uri: `${process.env.OVERLEAF_SITE_URL}/oauth/callback`,
 >       }
 >       const body = contentType === 'application/json'
 >         ? JSON.stringify(bodyParams)
