@@ -1,0 +1,8 @@
+11c11
+<   trackChangesAvailable: false,
+---
+>   trackChangesAvailable: true,
+60c60
+<       trackChanges: false,
+---
+>       trackChanges: true,
