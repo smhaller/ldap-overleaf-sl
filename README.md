@@ -2,7 +2,7 @@
 
 This repo contains an improved, free ldap authentication and authorisation 
 for sharelatex/[overleaf](https://github.com/overleaf/overleaf) community 
-edition. Currently this repo uses `sharelatex/sharelatex:4.2.0`.
+edition. Currently this repo uses `sharelatex/sharelatex:5.0.6`.
 
 The inital idea for this implementation was taken from 
 [worksasintended](https://github.com/worksasintended).
@@ -19,6 +19,8 @@ bash scripts/extract_files.sh 5.0.6
 bash scripts/apply_diffs.sh
 make
 ```
+
+**Note:** TrackChanges uses newer versions of Feature/Chat and Feature/DocumentUpdater - those are pulled during make directly from the Overleaf git repository.
 
 
 ## BREAKING CHANGE
