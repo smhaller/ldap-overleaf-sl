@@ -7,6 +7,20 @@ edition. Currently this repo uses `sharelatex/sharelatex:4.2.0`.
 The inital idea for this implementation was taken from 
 [worksasintended](https://github.com/worksasintended).
 
+## Upgrading from 4.x to 5.0
+- enter mongo database container and open a mongo shell
+```mongo```
+- execute 
+```db.adminCommand({ setFeatureCompatibilityVersion: "4.4" })```
+ in the MongoDB shell.
+- Then upgrade:
+```
+bash scripts/extract_files.sh 5.0.6
+bash scripts/apply_diffs.sh
+make
+```
+
+
 ## BREAKING CHANGE
 
 Be careful if you try to migrate from 3.3.2! Backup your machines and data. The migration paths should be:

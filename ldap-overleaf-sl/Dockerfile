@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:4.2.0
+FROM sharelatex/sharelatex:5.0.6
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
 # e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
@@ -20,10 +20,10 @@ RUN npm install -g npm && \
     npm install ldap-escape ldapts-search ldapts@3.2.4 && \
     # npm install bcrypt@5.0.0 && \
     apt-get update && \
-    apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 python-pygments && \
+    apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 && \
     # now install latest texlive2023 from tlmgr
-    tlmgr update --self --all  && \
-    tlmgr install scheme-full --verify-repo=none && \
+    #tlmgr update --self --all  && \
+    #tlmgr install scheme-full --verify-repo=none && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -35,13 +35,29 @@ ENV PATH="/usr/local/texlive/2023/bin/x86_64-linux:${PATH};"
 COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/ContactController.js        /overleaf/services/web/app/src/Features/Contacts/
+COPY sharelatex/ProjectEditorHandler.js     /overleaf/services/web/app/src/Features/Project/
+COPY sharelatex/TrackChangesController.js   /overleaf/services/web/app/src/Features/TrackChanges/
 COPY sharelatex/router.js                   /overleaf/services/web/app/src/router.js
 
+## Copy some new files from the Docker git repo (because they are not in the current Docker release - to enable Track-Changes
+
+RUN wget -O /overleaf/services/web/app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js https://raw.githubusercontent.com/overleaf/overleaf/main/services/web/app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js 
+RUN wget -O /overleaf/services/web/app/src/Features/Chat/ChatApiHandler.js https://raw.githubusercontent.com/overleaf/overleaf/main/services/web/app/src/Features/Chat/ChatApiHandler.js
+RUN wget -O /overleaf/services/web/app/src/Features/Chat/ChatController.js https://raw.githubusercontent.com/overleaf/overleaf/main/services/web/app/src/Features/Chat/ChatController.js
+RUN wget -O /overleaf/services/web/app/src/Features/Chat/ChatManager.js https://raw.githubusercontent.com/overleaf/overleaf/main/services/web/app/src/Features/Chat/ChatManager.js
+
+
+
+
 # Too much changes to do inline (>10 Lines).
-COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
+#COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
 COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
-COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
+#COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
 COPY sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
+
+# Copy TrackChanges Module
+#COPY sharelatex-modules/track-changes  /overleaf/services/web/modules/track-changes
+
 
 # Non LDAP User Registration for Admins
 COPY sharelatex/admin-index.pug     /overleaf/services/web/app/views/admin/index.pug

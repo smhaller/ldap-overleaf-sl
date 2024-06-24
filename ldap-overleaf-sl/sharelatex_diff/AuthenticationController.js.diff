@@ -1,6 +1,4 @@
-268a268,364
-> 
-> // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+300a301,394
 >   oauth2Redirect(req, res, next) {
 >     // random state
 >     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -95,4 +93,3 @@
 >       console.error("Fails to access by OAuth2: " + String(e))
 >     }
 >   },
-> // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
