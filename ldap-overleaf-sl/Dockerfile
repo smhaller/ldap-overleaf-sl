@@ -36,7 +36,7 @@ COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Featu
 COPY sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
 COPY sharelatex/ContactController.js        /overleaf/services/web/app/src/Features/Contacts/
 COPY sharelatex/ProjectEditorHandler.js     /overleaf/services/web/app/src/Features/Project/
-COPY sharelatex/TrackChangesController.js   /overleaf/services/web/app/src/Features/TrackChanges/
+COPY sharelatex_diff/TrackChangesController.js   /overleaf/services/web/app/src/Features/TrackChanges/
 COPY sharelatex/router.js                   /overleaf/services/web/app/src/router.js
 
 ## Copy some new files from the Docker git repo (because they are not in the current Docker release - to enable Track-Changes
