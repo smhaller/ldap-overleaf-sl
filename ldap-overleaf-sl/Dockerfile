@@ -20,10 +20,12 @@ RUN npm install -g npm && \
     npm install ldap-escape ldapts-search ldapts@3.2.4 && \
     # npm install bcrypt@5.0.0 && \
     apt-get update && \
-    apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 && \
+    apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 python3-pygments 
     # now install latest texlive2023 from tlmgr
-    #tlmgr update --self --all  && \
-    #tlmgr install scheme-full --verify-repo=none && \
+RUN wget -O /tmp/update-tlmgr-latest.sh http://mirror.ctan.org/systems/texlive/tlnet/update-tlmgr-latest.sh
+RUN bash /tmp/update-tlmgr-latest.sh 
+RUN tlmgr update --self --all  && \
+    tlmgr install scheme-full --verify-repo=none && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

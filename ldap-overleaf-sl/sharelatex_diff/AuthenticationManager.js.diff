@@ -20,12 +20,39 @@
 >       auditLog = null
 >     }
 >     AuthenticationManager._checkUserPassword2(
-201a218,467
+201a218,494
 >   /**
 >    * login with any password
 >    */
 >   login(user, password, callback) {
 >     callback(null, user, true)
+>   },
+> 
+>   createIfNotFoundAndLogin(
+>     query,
+>     callback,
+>     uid,
+>     firstname,
+>     lastname,
+>     mail,
+>     isAdmin
+>   ) {
+>     User.findOne(query, (error, user) => {
+>       if (error) {
+>         console.log(error)
+>       }
+> 
+>       AuthenticationManager.createIfNotExistAndLogin(
+>         query,
+>         user,
+>         callback,
+>         uid,
+>         firstname,
+>         lastname,
+>         mail,
+>         isAdmin
+>       )
+>     })
 >   },
 > 
 >   createIfNotExistAndLogin(
