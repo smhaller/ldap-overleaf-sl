@@ -1,6 +1,17 @@
 39a40
 > const TrackChangesController = require('./Features/TrackChanges/TrackChangesController')
-259a261,267
+218c219,226
+<   webRouter.get('/login', UserPagesController.loginPage)
+---
+>   // If no LDAP Server is in use and no local db login then we can redirect the login 
+>   // and just use OAUTH
+>   if ( (typeof process.env.LDAP_SERVER === typeof undefined) && (process.env.ALLOW_EMAIL_LOGIN === 'false') && (process.env.OAUTH2_ENABLED === 'true') ) {
+>     webRouter.get('/login', function (req, res, next) { res.redirect('/oauth/redirect') })
+>   } else {
+>     webRouter.get('/login', UserPagesController.loginPage)
+>   }
+>       
+259a268,274
 >   if (process.env.OAUTH2_ENABLED === 'true') {
 >     webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)
 >     webRouter.get('/oauth/callback', AuthenticationController.oauth2Callback)
@@ -8,7 +19,7 @@
 >     AuthenticationController.addEndpointToLoginWhitelist('/oauth/callback')
 >   }
 > 
-1352a1361,1429
+1352a1368,1436
 >   )
 > 
 >   webRouter.post('/project/:project_id/track_changes',
