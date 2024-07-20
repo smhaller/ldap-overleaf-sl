@@ -92,7 +92,7 @@ ADMIN_IS_SYSADMIN=false
 
 ### LDAP Configuration
 
-Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup.
+Edit [docker-compose.traefik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup.
 
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
