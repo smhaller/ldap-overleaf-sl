@@ -56,6 +56,7 @@ services:
 
       LDAP_SERVER: ldaps://LDAPSERVER:636
       LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
+      LDAP_SERVER_CACERT: /etc/ssl/certs/LDAPCERT
 
       ### There are to ways get users from the ldap server
 

@@ -108,11 +108,12 @@ ADMIN_IS_SYSADMIN=false
 
 ### LDAP Configuration
 
-Edit [docker-compose.treafik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup.
+Edit [docker-compose.traefik.yml](docker-compose.traefik.yml) or [docker-compose.certbot.yml](docker-compose.certbot.yml) to fit your local setup.
 
 ```
 LDAP_SERVER: ldaps://LDAPSERVER:636
 LDAP_BASE: dc=DOMAIN,dc=TLD
+LDAP_SERVER_CACERT: /etc/ssl/certs/LDAPCERT
 # If LDAP_BINDDN is set, the ldap bind happens directly by using the provided DN
 # All occurrences of `%u` get replaced by the entered uid.
 # All occurrences of `%m`get replaced by the entered mail.
