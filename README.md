@@ -1,3 +1,7 @@
+# Publish a new version
+
+On branch main, create a new GitHub release with a tag `vx.x.x.y` with `x.x.x` being the version of overleaf used. Currently `v5.1.1.y`
+
 # Free Overleaf Ldap Implementation
 
 This repo contains an improved, free ldap authentication and authorisation 
