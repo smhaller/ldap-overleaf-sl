@@ -16,41 +16,41 @@ services:
       - mongo
       - redis
     volumes:
-      - ${MYDATA}/sharelatex:/var/lib/sharelatex
+      - ${MYDATA}/sharelatex:/var/lib/overleaf
       - ${MYDATA}/letsencrypt:/etc/letsencrypt
       - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
     environment:
-      SHARELATEX_APP_NAME: Overleaf
-      SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
-      SHARELATEX_SITE_URL: https://${MYDOMAIN}
-      SHARELATEX_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
-      #SHARELATEX_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
-      SHARELATEX_ADMIN_EMAIL: ${MYMAIL}
-      SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
-      SHARELATEX_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
-      SHARELATEX_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
-      # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID:
-      # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY:
-      SHARELATEX_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
-      SHARELATEX_EMAIL_SMTP_PORT: 587
-      SHARELATEX_EMAIL_SMTP_SECURE: "false"
-      # SHARELATEX_EMAIL_SMTP_USER:
-      # SHARELATEX_EMAIL_SMTP_PASS:
-      # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
-      # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
-      SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues."
+      OVERLEAF_APP_NAME: Overleaf
+      OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex
+      OVERLEAF_SITE_URL: https://${MYDOMAIN}
+      OVERLEAF_NAV_TITLE: Overleaf - run by ${MYDOMAIN}
+      #OVERLEAF_HEADER_IMAGE_URL: https://${MYDOMAIN}/logo.svg
+      OVERLEAF_ADMIN_EMAIL: ${MYMAIL}
+      OVERLEAF_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
+      OVERLEAF_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
+      OVERLEAF_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
+      # OVERLEAF_EMAIL_AWS_SES_ACCESS_KEY_ID:
+      # OVERLEAF_EMAIL_AWS_SES_SECRET_KEY:
+      OVERLEAF_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
+      OVERLEAF_EMAIL_SMTP_PORT: 587
+      OVERLEAF_EMAIL_SMTP_SECURE: "false"
+      # OVERLEAF_EMAIL_SMTP_USER:
+      # OVERLEAF_EMAIL_SMTP_PASS:
+      # OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
+      # OVERLEAF_EMAIL_SMTP_IGNORE_TLS: false
+      OVERLEAF_CUSTOM_EMAIL_FOOTER: "This system is run by ${MYDOMAIN} - please contact ${MYMAIL} if you experience any issues."
 
       # make public links accessible w/o login (link sharing issue)
       # https://github.com/overleaf/docker-image/issues/66
       # https://github.com/overleaf/overleaf/issues/628
       # https://github.com/overleaf/web/issues/367
       # Fixed in 2.0.2 (Release date: 2019-11-26)
-      SHARELATEX_ALLOW_PUBLIC_ACCESS: "true"
-      SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
+      OVERLEAF_ALLOW_PUBLIC_ACCESS: "true"
+      OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
 
       # Uncomment the following line to enable secure cookies if you are using SSL
-      # SHARELATEX_SECURE_COOKIE: "true"
-      # SHARELATEX_BEHIND_PROXY: "true"
+      # OVERLEAF_SECURE_COOKIE: "true"
+      # OVERLEAF_BEHIND_PROXY: "true"
 
       LDAP_SERVER: ldaps://LDAPSERVER:636
       LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
@@ -98,7 +98,7 @@ services:
 
       # Same property, unfortunately with different names in
       # different locations
-      SHARELATEX_REDIS_HOST: redis
+      OVERLEAF_REDIS_HOST: redis
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
@@ -109,7 +109,7 @@ services:
 
   mongo:
     restart: always
-    image: mongo:4.4
+    image: mongo:5.0
     container_name: mongo
     expose:
       - 27017
@@ -124,7 +124,7 @@ services:
 
   # See also: https://github.com/overleaf/overleaf/issues/1120
   mongoinit:
-    image: mongo:4.4
+    image: mongo:5.0
     # this container will exit after executing the command
     restart: "no"
     depends_on:
