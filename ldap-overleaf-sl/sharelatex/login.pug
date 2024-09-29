@@ -18,7 +18,7 @@ block content
 							+customValidationMessage('password-compromised')
 								| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
 							//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-							if process.env.ALLOW_EMAIL_LOGIN !== 'false' && (process.env.LDAP_SERVER !== undefined || process.env.LDAP_SERVER !== "")
+							if process.env.ALLOW_EMAIL_LOGIN !== 'false' && process.env.LDAP_SERVER !== undefined
 								.form-group
 									input.form-control(
 										name='email',
