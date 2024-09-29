@@ -1,17 +1,10 @@
-14a15,22
+20a21
 > 								//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-> 								//- input.form-control(
-> 								//- 	type='email',
-> 								//- 	name='email',
-> 								//- 	required,
-> 								//- 	placeholder='email@example.com',
-> 								//- 	autofocus="true"
-> 								//- )
-16d23
+22d22
 < 									type='email',
-21a29
+27a28
 > 								//- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-36a45,50
+42a44,49
 > 							//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 > 							if process.env.OAUTH2_ENABLED === 'true'
 > 								.form-group.text-center(style="padding-top: 10px")
