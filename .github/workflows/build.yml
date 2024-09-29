@@ -2,7 +2,7 @@ name: Build image
 on:
   push:
     tags:
-      - 'v*.*.*.*'
+      - '*.*.*.*'
 
 jobs:
   docker:
@@ -19,8 +19,7 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_REGISTRY_IDENTIFER }}/overleaf-full-sso
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=tag
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
