@@ -36,9 +36,9 @@ jobs:
         with:
           context: .
           build-args: |
-            login_text='username'
-            collab_text='Direct share with collaborators is enabled only for activated users!'
-            admin_is_sysadmin='true'
+            login_text=username
+            collab_text=Direct share with collaborators is enabled only for activated users!
+            admin_is_sysadmin=true
           platforms: linux/amd64 #,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
