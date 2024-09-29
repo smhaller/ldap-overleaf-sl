@@ -1,0 +1,114 @@
+nav.navbar.navbar-default.navbar-main.website-redesign-navbar
+	.container-fluid
+		.navbar-header
+			if (typeof(suppressNavbarRight) == "undefined")
+				button.navbar-toggle.collapsed(
+					type="button",
+					data-toggle="collapse",
+					data-target="#navbar-main-collapse"
+					aria-label="Toggle " + translate('navigation')
+				)
+					i.fa.fa-bars(aria-hidden="true")
+			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+			if (enableUpgradeButton)
+				a.btn.btn-primary.pull-right.me-2.visible-xs(
+					href="/user/subscription/plans"
+					event-tracking="upgrade-button-click"
+					event-tracking-mb="true"
+					event-tracking-label="upgrade"
+					event-tracking-trigger="click"
+					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true", "is-screen-width-less-than-768px": "true"}'
+				) #{translate("upgrade")}
+			if settings.nav.custom_logo
+				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
+			else if (nav.title)
+				a(href='/', aria-label=settings.appName).navbar-title #{nav.title}
+			else
+				a(href='/', aria-label=settings.appName).navbar-brand
+
+		.navbar-collapse.collapse#navbar-main-collapse
+			ul.nav.navbar-nav.navbar-right
+				if (getSessionUser() && getSessionUser().isAdmin)
+					li.dropdown.subdued
+						a.dropdown-toggle(
+							href="#",
+							role="button",
+							aria-haspopup="true",
+							aria-expanded="false",
+							data-toggle="dropdown"
+						)
+							| Admin
+							span.caret
+
+				// loop over header_extras
+				each item in nav.header_extras
+					-
+						if ((item.only_when_logged_in && getSessionUser())
+							|| (item.only_when_logged_out && (!getSessionUser()))
+							|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+							|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+						){ 
+							var showNavItem = true
+						} else {
+							var showNavItem = false
+						}
+
+					if showNavItem
+						if item.dropdown
+							li.dropdown(class=item.class)
+								a.dropdown-toggle(
+									href="#",
+									role="button",
+									aria-haspopup="true",
+									aria-expanded="false",
+									data-toggle="dropdown"
+								)
+									| !{translate(item.text)}
+									span.caret
+								ul.dropdown-menu
+									each child in item.dropdown
+										if child.divider
+											li.divider
+										else if child.isContactUs
+											li
+												a(data-ol-open-contact-form-modal="contact-us" href)
+													span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
+														| #{translate("contact_us")}
+										else
+											li
+												if child.url
+													a(
+														href=child.url,
+														class=child.class,
+														event-tracking=child.event
+														event-tracking-mb="true"
+														event-tracking-trigger="click"
+														event-segmentation=child.eventSegmentation
+													) !{translate(child.text)}
+												else
+													| !{translate(child.text)}
+
+					// logged out
+					if !getSessionUser()
+						// login link
+						li
+							a(
+								href="/login"
+								event-tracking="menu-clicked-login"
+								event-tracking-action="clicked"
+								event-tracking-trigger="click"
+								event-tracking-mb="true"
+								event-segmentation={ page: currentUrl }
+							) #{translate('log_in')}
+
+					
+						li
+							a(href="/user/settings") #{translate('Account Settings')}
+						if nav.showSubscriptionLink
+							li
+								a(href="/user/subscription") #{translate('subscription')}
+							li.divider.hidden-xs.hidden-sm
+							li
+								form(method="POST" action="/logout")
+									input(name='_csrf', type='hidden', value=csrfToken)
+									button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}

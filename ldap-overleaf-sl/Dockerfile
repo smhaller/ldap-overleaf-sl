@@ -1,7 +1,5 @@
-FROM sharelatex/sharelatex:5.1.1
-# FROM sharelatex/sharelatex:latest
-# latest might not be tested 
-# e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
+FROM tuetenk0pp/sharelatex-full:5.1.1
+
 LABEL maintainer="Simon Haller-Seeber"
 LABEL version="0.1"
 
@@ -13,40 +11,26 @@ ARG admin_is_sysadmin
 # set workdir (might solve issue #2 - see https://stackoverflow.com/questions/57534295/)
 WORKDIR /overleaf/services/web
 
-    # install latest npm
-RUN npm install -g npm && \
-    ## clean cache (might solve issue #2)
-    # npm cache clean --force && \
-    npm install ldap-escape ldapts-search ldapts@3.2.4 && \
-    # npm install bcrypt@5.0.0 && \
-    apt-get update && \
-    apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 python-pygments && \
-    # now install latest texlive2023 from tlmgr
-    tlmgr update --self --all  && \
-    tlmgr install scheme-full --verify-repo=none && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 # latex-bin must be on path to be found in compilation process
 # needed for biber epstopdf and others
 ENV PATH="/usr/local/texlive/2023/bin/x86_64-linux:${PATH};"
 
 # overwrite some files
-COPY sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
-COPY sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
-COPY sharelatex/ContactController.js        /overleaf/services/web/app/src/Features/Contacts/
-COPY sharelatex/router.js                   /overleaf/services/web/app/src/router.js
+COPY ldap-overleaf-sl/sharelatex/AuthenticationManager.js    /overleaf/services/web/app/src/Features/Authentication/
+COPY ldap-overleaf-sl/sharelatex/AuthenticationController.js /overleaf/services/web/app/src/Features/Authentication/
+COPY ldap-overleaf-sl/sharelatex/ContactController.js        /overleaf/services/web/app/src/Features/Contacts/
+COPY ldap-overleaf-sl/sharelatex/router.js                   /overleaf/services/web/app/src/router.js
 
 # Too much changes to do inline (>10 Lines).
-COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
-COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
-COPY sharelatex/register.pug       /overleaf/services/web/app/views/user/
-COPY sharelatex/navbar-website-redesign.pug      /overleaf/services/web/app/views/layout/
-COPY sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
+COPY ldap-overleaf-sl/sharelatex/settings.pug    /overleaf/services/web/app/views/user/
+COPY ldap-overleaf-sl/sharelatex/login.pug       /overleaf/services/web/app/views/user/
+COPY ldap-overleaf-sl/sharelatex/register.pug       /overleaf/services/web/app/views/user/
+COPY ldap-overleaf-sl/sharelatex/navbar-website-redesign.pug      /overleaf/services/web/app/views/layout/
+COPY ldap-overleaf-sl/sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
 
 # Non LDAP User Registration for Admins
-COPY sharelatex/admin-index.pug     /overleaf/services/web/app/views/admin/index.pug
-COPY sharelatex/admin-sysadmin.pug  /tmp/admin-sysadmin.pug
+COPY ldap-overleaf-sl/sharelatex/admin-index.pug     /overleaf/services/web/app/views/admin/index.pug
+COPY ldap-overleaf-sl/sharelatex/admin-sysadmin.pug  /tmp/admin-sysadmin.pug
 
     ## comment out this line to prevent sed accidently remove the brackets of the email(username) field
     # sed -iE '/email@example.com/{n;N;N;d}' /overleaf/services/web/app/views/user/login.pug && \

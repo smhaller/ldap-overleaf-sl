@@ -1,0 +1,49 @@
+extends ../layout-marketing
+
+block content
+	main.content.content-alt#main-content
+		.container
+			.row
+				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+					.card
+						.page-header
+							h1 #{translate("log_in")}
+						form(data-ol-async-form, name="loginForm", action='/login', method="POST")
+							input(name='_csrf', type='hidden', value=csrfToken)
+							+formMessages()
+							+customFormMessage('invalid-password-retry-or-reset', 'danger')
+								| !{translate('email_or_password_wrong_try_again_or_reset', {}, [{ name: 'a', attrs: { href: '/user/password/reset', 'aria-describedby': 'resetPasswordDescription' } }])}
+								span.sr-only(id='resetPasswordDescription')
+									| #{translate('reset_password_link')}
+							+customValidationMessage('password-compromised')
+								| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
+							//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+							if process.env.ALLOW_EMAIL_LOGIN !== 'false' && (process.env.LDAP_SERVER !== undefined || process.env.LDAP_SERVER !== "")
+								.form-group
+									input.form-control(
+										name='email',
+										required,
+										placeholder='email@example.com',
+										autofocus="true"
+									)
+									
+								.form-group
+									input.form-control(
+										type='password',
+										name='password',
+										required,
+										placeholder='********',
+									)
+								.actions
+									button.btn-primary.btn(
+										type='submit',
+										data-ol-disabled-inflight
+									)
+										span(data-ol-inflight="idle") #{translate("login")}
+										span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
+									a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
+							if process.env.OAUTH2_ENABLED === 'true'
+								.form-group.text-center(style="padding-top: 10px")
+									a.btn-block.login-btn(href="/oauth/redirect" style='padding-left: 0px')
+										| Log in via #{process.env.OAUTH2_PROVIDER || 'OAuth'}
+							//- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
