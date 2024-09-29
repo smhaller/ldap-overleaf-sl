@@ -1,10 +1,10 @@
-1c1
-< extends ../layout-marketing
----
-> extends ../layout
-3,4c3,14
+3,8c3,82
 < block entrypointVar
 < 	- entrypoint = 'pages/user/settings'
+< 		
+< block vars
+< 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
+< 	- bootstrap5PageSplitTest = 'bootstrap-5'
 ---
 > block content
 > 	.content.content-alt
@@ -18,38 +18,6 @@
 > 						.page-header
 > 							h1  #{translate("account_settings")}
 > 						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
-6,29c16,17
-< block append meta
-< 	meta(name="ol-hasPassword" data-type="boolean" content=hasPassword)
-< 	meta(name="ol-shouldAllowEditingDetails" data-type="boolean" content=shouldAllowEditingDetails)
-< 	meta(name="ol-oauthProviders", data-type="json", content=oauthProviders)
-< 	meta(name="ol-institutionLinked", data-type="json", content=institutionLinked)
-< 	meta(name="ol-samlError", data-type="json", content=samlError)
-< 	meta(name="ol-institutionEmailNonCanonical", content=institutionEmailNonCanonical)
-< 
-< 	meta(name="ol-reconfirmedViaSAML", content=reconfirmedViaSAML)
-< 	meta(name="ol-reconfirmationRemoveEmail", content=reconfirmationRemoveEmail)
-< 	meta(name="ol-samlBeta", content=samlBeta)
-< 	meta(name="ol-ssoErrorMessage", content=ssoErrorMessage)
-< 	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds || {})
-< 	meta(name="ol-passwordStrengthOptions", data-type="json", content=settings.passwordStrengthOptions || {})
-< 	meta(name="ol-isExternalAuthenticationSystemUsed" data-type="boolean" content=externalAuthenticationSystemUsed())
-< 	meta(name="ol-user" data-type="json" content=user)
-< 	meta(name="ol-dropbox" data-type="json" content=dropbox)
-< 	meta(name="ol-github" data-type="json" content=github)
-< 	meta(name="ol-projectSyncSuccessMessage", content=projectSyncSuccessMessage)
-< 	meta(name="ol-showPersonalAccessToken", data-type="boolean" content=showPersonalAccessToken)
-< 	meta(name="ol-optionalPersonalAccessToken", data-type="boolean" content=optionalPersonalAccessToken)
-< 	meta(name="ol-personalAccessTokens", data-type="json" content=personalAccessTokens)
-< 	meta(name="ol-emailAddressLimit", data-type="json", content=emailAddressLimit)
-< 	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
----
-> 
-> 
-31,32c19,178
-< block content
-< 	main.content.content-alt#settings-page-root
----
 > 							.row
 > 								.col-md-5
 > 									h3 #{translate("update_account_info")}
@@ -63,7 +31,6 @@
 > 													readonly="true",
 > 													ng-non-bindable
 > 												) #{user.email}
-> 
 > 										if shouldAllowEditingDetails
 > 											.form-group
 > 												label(for='firstName').control-label #{translate("first_name")}
@@ -105,7 +72,6 @@
 > 													readonly="true",
 > 													ng-non-bindable
 > 												) #{user.last_name}
-> 
 > 								.col-md-5.col-md-offset-1
 > 									h3 
 > 										| Set Password for Email login
@@ -113,10 +79,6 @@
 > 										| Note: you can not change the LDAP password from here. You can set/reset a password for 
 > 										| your email login:
 > 										| #[a(href="/user/password/reset", target='_blank') Reset.]
-> 
-> 							| !{moduleIncludes("userSettings", locals)}
-> 							hr
-> 
 > 							h3
 > 								| Contact
 > 							div 
@@ -124,9 +86,35 @@
 > 							
 > 							p #{translate("need_to_leave")} 
 > 								a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
-> 
-> 
-> 
+10,16d83
+< block append meta
+< 	meta(name="ol-hasPassword" data-type="boolean" content=hasPassword)
+< 	meta(name="ol-shouldAllowEditingDetails" data-type="boolean" content=shouldAllowEditingDetails)
+< 	meta(name="ol-oauthProviders", data-type="json", content=oauthProviders)
+< 	meta(name="ol-institutionLinked", data-type="json", content=institutionLinked)
+< 	meta(name="ol-samlError", data-type="json", content=samlError)
+< 	meta(name="ol-institutionEmailNonCanonical", content=institutionEmailNonCanonical)
+18,36c85,95
+< 	meta(name="ol-reconfirmedViaSAML", content=reconfirmedViaSAML)
+< 	meta(name="ol-reconfirmationRemoveEmail", content=reconfirmationRemoveEmail)
+< 	meta(name="ol-samlBeta", content=samlBeta)
+< 	meta(name="ol-ssoErrorMessage", content=ssoErrorMessage)
+< 	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds || {})
+< 	meta(name="ol-passwordStrengthOptions", data-type="json", content=settings.passwordStrengthOptions || {})
+< 	meta(name="ol-isExternalAuthenticationSystemUsed" data-type="boolean" content=externalAuthenticationSystemUsed())
+< 	meta(name="ol-user" data-type="json" content=user)
+< 	meta(name="ol-dropbox" data-type="json" content=dropbox)
+< 	meta(name="ol-github" data-type="json" content=github)
+< 	meta(name="ol-projectSyncSuccessMessage", content=projectSyncSuccessMessage)
+< 	meta(name="ol-showPersonalAccessToken", data-type="boolean" content=showPersonalAccessToken)
+< 	meta(name="ol-optionalPersonalAccessToken", data-type="boolean" content=optionalPersonalAccessToken)
+< 	meta(name="ol-personalAccessTokens", data-type="json" content=personalAccessTokens)
+< 	meta(name="ol-emailAddressLimit", data-type="json", content=emailAddressLimit)
+< 	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
+< 	meta(name="ol-gitBridgeEnabled" data-type="boolean" content=gitBridgeEnabled)
+< 	meta(name="ol-isSaas" data-type="boolean" content=isSaas)
+< 	meta(name="ol-memberOfSSOEnabledGroups" data-type="json" content=memberOfSSOEnabledGroups)
+---
 > 	script(type='text/ng-template', id='deleteAccountModalTemplate')
 > 		.modal-header
 > 			h3 #{translate("delete_account")}
@@ -138,7 +126,11 @@
 > 						| Your Overleaf v2 projects will be deleted if you delete your account.
 > 						| If you want to remove any remaining Overleaf v1 projects in your account,
 > 						| please first make sure they are imported to Overleaf v2.
-> 
+38,40c97,167
+< block content
+< 	main.content.content-alt#main-content
+< 		#settings-page-root
+---
 > 			if settings.overleaf && !hasPassword
 > 				p
 > 					b

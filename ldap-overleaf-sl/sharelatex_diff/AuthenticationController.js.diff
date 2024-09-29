@@ -1,4 +1,6 @@
-268a268,364
+326a327,346
+>   },
+> 
 > 
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   oauth2Redirect(req, res, next) {
@@ -7,7 +9,7 @@
 >     const state = new Array(6).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
 >     req.session.oauth2State = state
 > 
->     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 
+>     const redirectURI = encodeURIComponent(`${process.env.OVERLEAF_SITE_URL}/oauth/callback`) 
 >     const authURL = (
 >       process.env.OAUTH2_AUTHORIZATION_URL
 >       + `?response_type=code`
@@ -17,8 +19,7 @@
 >       + `&state=${state}`
 >     )
 >     res.redirect(authURL)
->   },
-> 
+328a349,419
 >   async oauth2Callback(req, res, next) {
 >     console.log(`OAuth, receive code ${req.query.code} and state ${req.query.state}`)
 >     const saveState = req.session.oauth2State
@@ -34,7 +35,7 @@
 >         client_id: process.env.OAUTH2_CLIENT_ID,
 >         client_secret: process.env.OAUTH2_CLIENT_SECRET,
 >         code: req.query.code,
->         redirect_uri: `${process.env.SHARELATEX_SITE_URL}/oauth/callback`,
+>         redirect_uri: `${process.env.OVERLEAF_SITE_URL}/oauth/callback`,
 >       }
 >       const body = contentType === 'application/json'
 >         ? JSON.stringify(bodyParams)
@@ -73,26 +74,20 @@
 >         : false
 > 
 >       const query = { email }
->       const callback = (error, user) => {
->         if (error) {
->           res.json({message: error});
->         } else {
->           console.log("OAuth user", JSON.stringify(user));
->           AuthenticationController.finishLogin(user, req, res, next);
->         }
->       }
->       AuthenticationManager.createIfNotFoundAndLogin(
+>      
+>       const { user } = await AuthenticationManager.createIfNotFoundAndLogin(
 >         query,
->         callback,
 >         uid,
 >         firstname,
 >         lastname,
 >         email,
 >         isAdmin
 >       )
+>       AuthenticationController.finishLogin(user, req, res, next);
 >     } catch(e) {
 >       res.redirect("/login")
 >       console.error("Fails to access by OAuth2: " + String(e))
+>       console.error(e);
 >     }
 >   },
 > // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

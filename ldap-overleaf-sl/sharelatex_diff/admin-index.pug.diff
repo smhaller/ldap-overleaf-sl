@@ -13,15 +13,15 @@
 < 									.row-spaced
 < 										ul
 < 											each agents, url in openSockets
-< 												li(ng-non-bindable) #{url} - total : #{agents.length}
+< 												li #{url} - total : #{agents.length}
 < 													ul
 < 														each agent in agents
-< 															li(ng-non-bindable) #{agent}
+< 															li #{agent}
 53c39
 < 									id='open-close-editor'
 ---
 > 									id='register-user'
-55,74c41,42
+55,99c41,43
 < 									if hasFeature('saas')
 < 										| The "Open/Close Editor" feature is not available in SAAS.
 < 									else
@@ -42,10 +42,7 @@
 < 												input(name="_csrf", type="hidden", value=csrfToken)
 < 												button.btn.btn-danger(type="submit") Reopen Editor
 < 											p.small Will reopen the editor after closing.
----
-> 									hr
-> 									a(href="/admin/register") Register User
-76,99d43
+< 
 < 								if hasFeature('saas')
 < 									.tab-pane(
 < 										role="tabpanel"
@@ -70,3 +67,7 @@
 < 													input.form-control(type='text',  name='user_id', placeholder='user_id', required)
 < 												.form-group
 < 													button.btn-primary.btn(type='submit') Poll
+---
+> 									hr
+> 									a(href="/admin/register") Register User
+> 					

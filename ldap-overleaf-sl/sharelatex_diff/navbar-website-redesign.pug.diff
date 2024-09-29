@@ -1,0 +1,218 @@
+29,32c29,41
+< 		- var canDisplayAdminMenu = hasAdminAccess()
+< 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
+< 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
+< 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
+---
+> 		.navbar-collapse.collapse#navbar-main-collapse
+> 			ul.nav.navbar-nav.navbar-right
+> 				if (getSessionUser() && getSessionUser().isAdmin)
+> 					li.dropdown.subdued
+> 						a.dropdown-toggle(
+> 							href="#",
+> 							role="button",
+> 							aria-haspopup="true",
+> 							aria-expanded="false",
+> 							data-toggle="dropdown"
+> 						)
+> 							| Admin
+> 							span.caret
+34,64c43,54
+< 		if (typeof(suppressNavbarRight) == "undefined")
+< 			.navbar-collapse.collapse#navbar-main-collapse
+< 				ul.nav.navbar-nav.navbar-right
+< 					if (canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu)
+< 						li.dropdown.subdued
+< 							a.dropdown-toggle(
+< 								href="#",
+< 								role="button",
+< 								aria-haspopup="true",
+< 								aria-expanded="false",
+< 								data-toggle="dropdown"
+< 							)
+< 								| Admin
+< 								span.caret
+< 							ul.dropdown-menu
+< 								if canDisplayAdminMenu
+< 									li
+< 										a(href="/admin") Manage Site
+< 									li
+< 										a(href="/admin/user") Manage Users
+< 									li
+< 										a(href="/admin/project") Project URL Lookup
+< 								if canDisplayAdminRedirect
+< 									li
+< 										a(href=settings.adminUrl) Switch to Admin
+< 								if canDisplaySplitTestMenu
+< 									li
+< 										a(href="/admin/split-test") Manage Feature Flags
+< 								if canDisplaySurveyMenu
+< 									li
+< 										a(href="/admin/survey") Manage Surveys
+---
+> 				// loop over header_extras
+> 				each item in nav.header_extras
+> 					-
+> 						if ((item.only_when_logged_in && getSessionUser())
+> 							|| (item.only_when_logged_out && (!getSessionUser()))
+> 							|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+> 							|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+> 						){ 
+> 							var showNavItem = true
+> 						} else {
+> 							var showNavItem = false
+> 						}
+66,77c56,89
+< 					// loop over header_extras
+< 					each item in nav.header_extras
+< 						-
+< 							if ((item.only_when_logged_in && getSessionUser())
+< 											|| (item.only_when_logged_out && (!getSessionUser()))
+< 											|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+< 											|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+< 							){
+< 								var showNavItem = true
+< 							} else {
+< 								var showNavItem = false
+< 							}
+---
+> 					if showNavItem
+> 						if item.dropdown
+> 							li.dropdown(class=item.class)
+> 								a.dropdown-toggle(
+> 									href="#",
+> 									role="button",
+> 									aria-haspopup="true",
+> 									aria-expanded="false",
+> 									data-toggle="dropdown"
+> 								)
+> 									| !{translate(item.text)}
+> 									span.caret
+> 								ul.dropdown-menu
+> 									each child in item.dropdown
+> 										if child.divider
+> 											li.divider
+> 										else if child.isContactUs
+> 											li
+> 												a(data-ol-open-contact-form-modal="contact-us" href)
+> 													span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
+> 														| #{translate("contact_us")}
+> 										else
+> 											li
+> 												if child.url
+> 													a(
+> 														href=child.url,
+> 														class=child.class,
+> 														event-tracking=child.event
+> 														event-tracking-mb="true"
+> 														event-tracking-trigger="click"
+> 														event-segmentation=child.eventSegmentation
+> 													) !{translate(child.text)}
+> 												else
+> 													| !{translate(child.text)}
+79,125d90
+< 						if showNavItem
+< 							if item.dropdown
+< 								li.dropdown(class=item.class)
+< 									a.dropdown-toggle(
+< 										href="#",
+< 										role="button",
+< 										aria-haspopup="true",
+< 										aria-expanded="false",
+< 										data-toggle="dropdown"
+< 									)
+< 										| !{translate(item.text)}
+< 										span.caret
+< 									ul.dropdown-menu
+< 										each child in item.dropdown
+< 											if child.divider
+< 												li.divider
+< 											else if child.isContactUs
+< 												li
+< 													a(data-ol-open-contact-form-modal="contact-us" href)
+< 														span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
+< 															| #{translate("contact_us")}
+< 											else
+< 												li
+< 													if child.url
+< 														a(
+< 															href=child.url,
+< 															class=child.class,
+< 															event-tracking=child.event
+< 															event-tracking-mb="true"
+< 															event-tracking-trigger="click"
+< 															event-segmentation=child.eventSegmentation
+< 														) !{translate(child.text)}
+< 													else
+< 														| !{translate(child.text)}
+< 							else
+< 								li(class=item.class)
+< 									if item.url
+< 										a(
+< 											href=item.url,
+< 											class=item.class,
+< 											event-tracking=item.event
+< 											event-tracking-mb="true"
+< 											event-tracking-trigger="click"
+< 										) !{translate(item.text)}
+< 									else
+< 										| !{translate(item.text)}
+< 
+128,139d92
+< 						// register link
+< 						if hasFeature('registration-page')
+< 							li.primary
+< 								a(
+< 									href="/register"
+< 									event-tracking="menu-clicked-register"
+< 									event-tracking-action="clicked"
+< 									event-tracking-trigger="click"
+< 									event-tracking-mb="true"
+< 									event-segmentation={ page: currentUrl }
+< 								) #{translate('sign_up')}
+< 
+141c94
+< 						li.secondary
+---
+> 						li
+151,178c104,114
+< 					// projects link and account menu
+< 					if getSessionUser()
+< 						li.secondary
+< 							a(href="/project") #{translate('Projects')}
+< 						li.secondary.dropdown
+< 							a.dropdown-toggle(
+< 								href="#",
+< 								role="button",
+< 								aria-haspopup="true",
+< 								aria-expanded="false",
+< 								data-toggle="dropdown"
+< 							)
+< 								| #{translate('Account')}
+< 								span.caret
+< 							ul.dropdown-menu
+< 								li
+< 									div.subdued #{getSessionUser().email}
+< 								li.divider.hidden-xs.hidden-sm
+< 								li
+< 									a(href="/user/settings") #{translate('Account Settings')}
+< 								if nav.showSubscriptionLink
+< 									li
+< 										a(href="/user/subscription") #{translate('subscription')}
+< 								li.divider.hidden-xs.hidden-sm
+< 								li
+< 									form(method="POST" action="/logout")
+< 										input(name='_csrf', type='hidden', value=csrfToken)
+< 										button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}
+---
+> 					
+> 						li
+> 							a(href="/user/settings") #{translate('Account Settings')}
+> 						if nav.showSubscriptionLink
+> 							li
+> 								a(href="/user/subscription") #{translate('subscription')}
+> 							li.divider.hidden-xs.hidden-sm
+> 							li
+> 								form(method="POST" action="/logout")
+> 									input(name='_csrf', type='hidden', value=csrfToken)
+> 									button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}
