@@ -1,0 +1,114 @@
+\documentclass{rapportECL2024}
+
+\addbibresource{biblio.bib}
+
+%--------------------------------------
+
+\titre{Titre}
+\soustitre{Sous-titre}
+
+\enseignant{Prénom \textsc{Nom} \\
+            Prénom \textsc{Nom} }
+
+\eleves{Prénom \textsc{Nom} \\
+	Prénom \textsc{Nom} \\ 
+	Prénom \textsc{Nom} }
+
+%--------------------------------------
+
+\begin{document}
+
+\fairepagedegarde
+\fairetabledesmatieres
+
+%--------------------------------------
+
+\section{Section 1}
+\lipsum[1]
+
+
+\subsection{Sous-section 1}
+\lipsum[2]
+
+\subsection{Sous-section 2}
+\lipsum[3]
+
+\subsubsection{Sous-sous-section 1}
+\lipsum[4]
+
+\section{Section 2}
+\lipsum[5]
+
+\section{Des commandes utiles}
+
+\textbf{Insérer une image}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{logos/logo.png}
+    \caption{Insérer une image.}
+    \label{fig:logo}
+\end{figure}
+
+ou la version raccourcie avec \texttt{\textbackslash insererfigure} : \insererfigure{logos/logo.png}{0.5\textwidth}{Insérer une image avec une commande.}{logo_raccourci}
+
+
+\textbf{Citer une figure} avec \texttt{\textbackslash ref} : \ref{fig:logo_raccourci}.\\
+
+
+\textbf{Insérer des expressions mathématiques} en bloc :
+\begin{equation*}
+    \int_{-\infty}^{\infty} e^{-x^2} \, \text{d}x = \sqrt{\pi}
+\end{equation*}
+
+ou bien en \textit{inline} : $\int_{-\infty}^{\infty} e^{-x^2} \, \text{d}x = \sqrt{\pi}$.\\
+
+
+\textbf{Insérer une série de calculs}
+\begin{align*}
+    x &= 0.999\ldots \\
+    10x &= 9.999\ldots \\
+    10x - x &= 9.999\ldots - 0.999\ldots \\
+    9x &= 9 \\
+    x &= 1 \\
+    0.999\ldots &= 1
+\end{align*}
+
+
+\textbf{Insérer une liste}
+\begin{itemize}
+    \item Premier niveau
+    \begin{itemize}
+        \item Deuxième niveau
+        \item Un autre élément au deuxième niveau
+    \end{itemize}
+    \item Un autre élément au premier niveau\\
+\end{itemize}
+
+
+\textbf{Insérer un tableau simple} \\
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        A & B & C \\
+        \hline
+        1 & 2 & 3 \\
+        4 & 5 & 6 \\
+        \hline
+    \end{tabular}
+    \caption{Un tableau simple.}
+    \label{tab:tableau_simple}
+\end{table}
+
+
+\textbf{Insérer du code} : \texttt{print("Hello, World!")}.\\
+
+
+\textbf{Citer une source} depuis \texttt{biblio.bib} avec \texttt{\textbackslash cite} : \cite{exemple_de_source}.\\
+
+
+\textbf{Afficher une bibliographie} rapidement avec \texttt{\textbackslash insererbiblio}.
+
+\insererbiblio 
+
+\end{document}

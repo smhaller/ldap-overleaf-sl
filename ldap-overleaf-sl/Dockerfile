@@ -32,8 +32,8 @@ COPY ldap-overleaf-sl/sharelatex/navbar-marketing.pug      /overleaf/services/we
 COPY ldap-overleaf-sl/sharelatex/admin-index.pug     /overleaf/services/web/app/views/admin/index.pug
 COPY ldap-overleaf-sl/sharelatex/admin-sysadmin.pug  /tmp/admin-sysadmin.pug
 
-    ## comment out this line to prevent sed accidently remove the brackets of the email(username) field
-    # sed -iE '/email@example.com/{n;N;N;d}' /overleaf/services/web/app/views/user/login.pug && \
+## comment out this line to prevent sed accidently remove the brackets of the email(username) field
+# sed -iE '/email@example.com/{n;N;N;d}' /overleaf/services/web/app/views/user/login.pug && \
 RUN sed -iE "s/email@example.com/${login_text:-user}/g" /overleaf/services/web/app/views/user/login.pug && \
     ## Collaboration settings display (share project placeholder) | edit line 146
     ## share.pug file was removed in later versions
@@ -43,16 +43,18 @@ RUN sed -iE "s/email@example.com/${login_text:-user}/g" /overleaf/services/web/a
     sed -iE "s%-synctex=1\",%-synctex=1\", \"-shell-escape\",%g" /overleaf/services/clsi/app/js/LatexRunner.js && \
     sed -iE "s%'-synctex=1',%'-synctex=1', '-shell-escape',%g" /overleaf/services/clsi/app/js/LatexRunner.js && \
     if [ "${admin_is_sysadmin}" = "true" ] ; \
-        then cp /tmp/admin-sysadmin.pug /overleaf/services/web/app/views/admin/index.pug ; \
-        else rm /tmp/admin-sysadmin.pug ; \
+    then cp /tmp/admin-sysadmin.pug /overleaf/services/web/app/views/admin/index.pug ; \
+    else rm /tmp/admin-sysadmin.pug ; \
     fi 
-    # This seems to be fixed in Sharelatex 4.
-    # && \
-    # rm /overleaf/services/web/modules/user-activate/app/views/user/register.pug && \
-    ### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
-    #rm /overleaf/services/web/app/views/project/editor/review-panel.pug && \
-    #touch /overleaf/services/web/app/views/project/editor/review-panel.pug
+# This seems to be fixed in Sharelatex 4.
+# && \
+# rm /overleaf/services/web/modules/user-activate/app/views/user/register.pug && \
+### To remove comments entirly (bug https://github.com/overleaf/overleaf/issues/678)
+#rm /overleaf/services/web/app/views/project/editor/review-panel.pug && \
+#touch /overleaf/services/web/app/views/project/editor/review-panel.pug
 
+
+COPY ldap-overleaf-sl/template /overleaf/services/web/app/templates/project_files/example-project
 
 ### Nginx and Certificates
 # enable https via letsencrypt
