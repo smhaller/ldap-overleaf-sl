@@ -1,0 +1,15 @@
+28,32c28,35
+< 							| Please contact
+< 							|
+< 							strong #{settings.adminEmail}
+< 							|
+< 							| to create an account.
+---
+> 							if process.env.REGISTER_TEXT !== undefined && process.env.REGISTER_TEXT !== ""
+> 								| #{process.env.REGISTER_TEXT}
+> 							else
+> 								| Please contact
+> 								|
+> 								strong #{settings.adminEmail}
+> 								|
+> 								| to create an account.

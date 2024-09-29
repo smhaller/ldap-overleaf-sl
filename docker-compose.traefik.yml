@@ -163,6 +163,11 @@ services:
       LDAP_CONTACT_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
       LDAP_CONTACTS: "false"
 
+      # On community edition, user registering with email/password is disabled
+      # but they can sign up using oauth2 or ldap
+      # By default the text on the register page is "Please contact <> to create an account."
+      #REGISTER_TEXT: "Sign in using your ldap credentials"
+
       ## OAuth2 Settings
       # OAUTH2_ENABLED: "true"
       # OAUTH2_PROVIDER: YOUR_OAUTH2_PROVIDER

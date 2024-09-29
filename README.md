@@ -134,6 +134,16 @@ LDAP_CONTACT_FILTER: (objectClass=person)
 LDAP_CONTACTS: 'true'
 ```
 
+
+### Register
+
+```yml
+# On community edition, user registering with email/password is disabled
+# but they can sign up using oauth2 or ldap
+# By default the text on the register page is "Please contact <> to create an account."
+#REGISTER_TEXT: "Sign in using your ldap credentials"
+```
+
 ### OAuth2 Configuration
 
 ```

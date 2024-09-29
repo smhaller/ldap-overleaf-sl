@@ -40,6 +40,7 @@ COPY sharelatex/router.js                   /overleaf/services/web/app/src/route
 # Too much changes to do inline (>10 Lines).
 COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
 COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
+COPY sharelatex/register.pug       /overleaf/services/web/app/views/user/
 COPY sharelatex/navbar-website-redesign.pug      /overleaf/services/web/app/views/layout/
 COPY sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
 
