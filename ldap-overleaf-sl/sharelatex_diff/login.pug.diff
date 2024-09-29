@@ -1,11 +1,53 @@
-20a21
-> 								//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-22d22
+20,42c20,49
+< 							.form-group
+< 								input.form-control(
 < 									type='email',
-27a28
-> 								//- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-42a44,49
+< 									name='email',
+< 									required,
+< 									placeholder='email@example.com',
+< 									autofocus="true"
+< 								)
+< 							.form-group
+< 								input.form-control(
+< 									type='password',
+< 									name='password',
+< 									required,
+< 									placeholder='********',
+< 								)
+< 							.actions
+< 								button.btn-primary.btn(
+< 									type='submit',
+< 									data-ol-disabled-inflight
+< 								)
+< 									span(data-ol-inflight="idle") #{translate("login")}
+< 									span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
+< 								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
+---
 > 							//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+> 							if process.env.ALLOW_EMAIL_LOGIN !== 'false' && (process.env.LDAP_SERVER !== undefined || process.env.LDAP_SERVER !== "")
+> 								.form-group
+> 									input.form-control(
+> 										name='email',
+> 										required,
+> 										placeholder='email@example.com',
+> 										autofocus="true"
+> 									)
+> 									
+> 								.form-group
+> 									input.form-control(
+> 										type='password',
+> 										name='password',
+> 										required,
+> 										placeholder='********',
+> 									)
+> 								.actions
+> 									button.btn-primary.btn(
+> 										type='submit',
+> 										data-ol-disabled-inflight
+> 									)
+> 										span(data-ol-inflight="idle") #{translate("login")}
+> 										span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
+> 									a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
 > 							if process.env.OAUTH2_ENABLED === 'true'
 > 								.form-group.text-center(style="padding-top: 10px")
 > 									a.btn-block.login-btn(href="/oauth/redirect" style='padding-left: 0px')
