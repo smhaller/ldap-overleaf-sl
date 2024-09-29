@@ -24,7 +24,7 @@
 < 								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
 ---
 > 							//- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-> 							if process.env.ALLOW_EMAIL_LOGIN !== 'false' && (process.env.LDAP_SERVER !== undefined || process.env.LDAP_SERVER !== "")
+> 							if process.env.ALLOW_EMAIL_LOGIN !== 'false' && process.env.LDAP_SERVER !== undefined
 > 								.form-group
 > 									input.form-control(
 > 										name='email',
