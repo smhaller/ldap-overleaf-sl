@@ -1,4 +1,4 @@
-259a260,268
+269a270,278
 >   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   if (process.env.OAUTH2_ENABLED === 'true') {
 >     webRouter.get('/oauth/redirect', AuthenticationController.oauth2Redirect)

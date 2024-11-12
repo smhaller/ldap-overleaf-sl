@@ -1,4 +1,4 @@
-FROM sharelatex/sharelatex:4.2.0
+FROM sharelatex/sharelatex:5.1.1
 # FROM sharelatex/sharelatex:latest
 # latest might not be tested 
 # e.g. the AuthenticationManager.js script had to be adapted after versions 2.3.1 
@@ -40,7 +40,7 @@ COPY sharelatex/router.js                   /overleaf/services/web/app/src/route
 # Too much changes to do inline (>10 Lines).
 COPY sharelatex/settings.pug    /overleaf/services/web/app/views/user/
 COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
-COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
+COPY sharelatex/navbar-website-redesign.pug      /overleaf/services/web/app/views/layout/
 COPY sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
 
 # Non LDAP User Registration for Admins
