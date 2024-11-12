@@ -4,7 +4,7 @@ This repo contains an improved, free ldap authentication and authorisation
 for sharelatex/[overleaf](https://github.com/overleaf/overleaf) community 
 edition. Currently this repo uses `sharelatex/sharelatex:4.2.0`.
 
-The inital idea for this implementation was taken from 
+The Initial idea for this implementation was taken from 
 [worksasintended](https://github.com/worksasintended).
 
 ## BREAKING CHANGE
@@ -50,7 +50,7 @@ it tries to authenticate against the specified LDAP server.
 *Important:*
 Sharelatex/Overleaf uses the email address to identify users: If you change the email in the LDAP/OAuth you have to update the corresponding field in the mongo db.
 
-```
+```bash
 docker exec -it mongo /bin/bash
 mongo 
 use sharelatex
@@ -86,7 +86,7 @@ COLLAB_TEXT=Direct share with collaborators is enabled only for activated users!
 ADMIN_IS_SYSADMIN=false
 ```
 
-*LOGIN_TEXT* : displayed instead of email-adress field (login.pug) <br/>
+*LOGIN_TEXT* : displayed instead of email-address field (login.pug) <br/>
 *COLLAB_TEXT* : displayed for email invitation (share.pug)<br/>
 *ADMIN_IS_SYSADMIN* : false or true (if ``false`` isAdmin group is allowed to add users to sharelatex and post messages. if ``true`` isAdmin group is allowed to logout other users / set maintenance mode)
 
@@ -217,43 +217,39 @@ Install the docker engine: https://docs.docker.com/engine/install/
 
 Install docker-compose:
 
-(if you need pip: apt install python3-pip)
+(If you need pip: apt install python3-pip)
 
-```
+```bash
 pip install docker-compose
 ```
 
-use the following commands:
+Use the following commands to generate the ldap-overleaf-sl docker image:
 
-```
+```bash
 bash scripts/extract_files.sh 4.2.0
 bash scripts/apply_diffs.sh
 make
 ```
 
-to generate the ldap-overleaf-sl docker image.
+Use the following command to create a network for the docker instances:
 
-use the command:
-
-```
+```bash
 docker network create web
 ```
 
-to create a network for the docker instances.
-
 ### Startup
 
-#### Using without proxy
+#### Using without reverse proxy
 
 In most cases, you should use a gateway reverse proxy for your requests (see the next section), as they can offer many benefits such as enhanced security and easier SSL certificate updates. This simple startup method is used for 1. Development 2. When you know what you're doing, for example, when there is an additional gateway layer outside your server.
 
 Start docker containers:
 
-``` 
+```bash
 docker-compose up -d
 ```
 
-#### Using proxy
+#### Using reverse proxy
 
 There are 2 different ways of starting either using Traefik or using Certbot. Adapt the one you want to use.
 
@@ -261,7 +257,7 @@ There are 2 different ways of starting either using Traefik or using Certbot. Ad
 
 Then start docker containers (with loadbalancer):
 
-``` 
+```bash
 export NUMINSTANCES=1
 docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTANCES
 ```
@@ -270,7 +266,7 @@ docker-compose -f docker-compose.traefik.yml up -d --scale sharelatex=$NUMINSTAN
 
 Enable line 65/66 and 69/70 in ldapoverleaf-sl/Dockerfile and ``make`` again.
 
-``` 
+```bash
 docker-compose -f docker-compose.certbot.yml up -d 
 ```
 
