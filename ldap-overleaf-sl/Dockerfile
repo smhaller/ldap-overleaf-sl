@@ -22,8 +22,8 @@ RUN npm install -g npm && \
     apt-get update && \
     apt-get -y install libxml-libxslt-perl cpanminus libbtparse2 python-pygments && \
     # now install latest texlive2023 from tlmgr
-    tlmgr update --self --all  && \
-    tlmgr install scheme-full --verify-repo=none && \
+    tlmgr update --self --all -repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2023/tlnet-final/ --no-verify-downloads && \
+    tlmgr install scheme-full --verify-repo=none -repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2023/tlnet-final/ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
