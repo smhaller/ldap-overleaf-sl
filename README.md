@@ -158,6 +158,8 @@ OAUTH2_TOKEN_URL: YOUR_OAUTH2_TOKEN_URL
 # One of ["application/x-www-form-urlencoded", "application/json"]
 # Default "application/x-www-form-urlencoded"
 OAUTH2_TOKEN_CONTENT_TYPE: "application/x-www-form-urlencoded"
+# OAUTH2_STATE_LENGTH: Length of the OAuth2 state
+OAUTH2_STATE_LENGTH: 6
 # Fetch user profile api endpoint
 OAUTH2_PROFILE_URL: YOUR_OAUTH2_PROFILE_URL
 

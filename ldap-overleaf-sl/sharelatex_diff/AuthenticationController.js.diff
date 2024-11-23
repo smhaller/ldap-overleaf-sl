@@ -1,10 +1,11 @@
-268a268,364
+268a269,366
 > 
 > // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 >   oauth2Redirect(req, res, next) {
 >     // random state
 >     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
->     const state = new Array(6).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
+>     const stateLength = Number(process.env.OAUTH2_STATE_LENGTH || 6)
+>     const state = new Array(stateLength).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
 >     req.session.oauth2State = state
 > 
 >     const redirectURI = encodeURIComponent(`${process.env.SHARELATEX_SITE_URL}/oauth/callback`) 

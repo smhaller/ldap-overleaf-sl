@@ -172,6 +172,7 @@ services:
       # OAUTH2_AUTHORIZATION_URL: YOUR_OAUTH2_AUTHORIZATION_URL
       # OAUTH2_TOKEN_URL: YOUR_OAUTH2_TOKEN_URL
       # OAUTH2_TOKEN_CONTENT_TYPE: # One of ['application/x-www-form-urlencoded', 'application/json']
+      # OAUTH2_STATE_LENGTH: Length of the OAuth2 state (default: 6)
       # OAUTH2_PROFILE_URL: YOUR_OAUTH2_PROFILE_URL
       # OAUTH2_USER_ATTR_EMAIL: email
       # OAUTH2_USER_ATTR_UID: id
