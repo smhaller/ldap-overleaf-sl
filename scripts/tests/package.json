@@ -1,0 +1,10 @@
+{
+  "name": "ldap-overleaf-upgrade-tests",
+  "private": true,
+  "scripts": {
+    "test": "PUG_MODULE_PATH=pug node --test *.test.cjs"
+  },
+  "devDependencies": {
+    "pug": "3.0.3"
+  }
+}
