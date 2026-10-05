@@ -1,24 +1,102 @@
-version: "2.2"
 services:
+  traefik:
+    image: ${TRAEFIK_IMAGE:-traefik:latest}
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+    ports:
+      - 80:80
+      - 443:443
+      - 8443:8443
+    volumes:
+      - ${MYDATA}/letsencrypt:/letsencrypt
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/dynamic_conf.yml:/dynamic_conf.yml
+      - ./traefik/users.htpasswd:/users.htpasswd
+    command:
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--ping"
+      - "--providers.docker.network=web"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/dynamic_conf.yml"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web-secure.address=:443"
+      - "--entrypoints.web-admin.address=:8443"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myhttpchallenge.acme.email=${MYMAIL}"
+      - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
+      #- --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+    labels:
+      - "traefik.enable=true"
+      # To Fix enable dashboard on port 8443
+      - "traefik.http.routers.dashboard.entrypoints=web-admin"
+      - "traefik.http.routers.dashboard.rule=Host(`${MYDOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      # - "traefik.http.routers.dashboard.rule=Host(`traefik.${MYDOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.routers.dashboard.tls.certresolver=myhttpchallenge"
+      - "traefik.http.middlewares.auth.basicauth.usersfile=/users.htpasswd"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+
   sharelatex:
     restart: always
-    image: ldap-overleaf-sl
-    container_name: ldap-overleaf-sl
+    image: ${OVERLEAF_IMAGE:-ldap-overleaf-sl:5.5.8}
+    build:
+      context: ./ldap-overleaf-sl
+      args:
+        login_text: ${LOGIN_TEXT:-username}
+        collab_text: ${COLLAB_TEXT:-Direct sharing with collaborators is enabled for activated users.}
+        admin_is_sysadmin: ${ADMIN_IS_SYSADMIN:-false}
+        TEXLIVE_REPOSITORY: ${TEXLIVE_REPOSITORY:-https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2025/tlnet-final}
     depends_on:
       mongo:
         condition: service_healthy
+      mongoinit:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
+      traefik:
+        condition: service_started
     privileged: false
-    ports:
-      - 80:80
-    links:
-      - mongo
-      - redis
+    networks:
+      - web
+    expose:
+      - 80
+      - 443
     volumes:
       - ${MYDATA}/sharelatex:/var/lib/overleaf
-      - ${MYDATA}/letsencrypt:/etc/letsencrypt
-      - ${MYDATA}/letsencrypt/live/${MYDOMAIN}/:/etc/letsencrypt/certs/domain
+    labels:
+      - "traefik.enable=true"
+      # handle https traffic
+      - "traefik.http.routers.sharel-secured.rule=Host(`${MYDOMAIN}`)"
+      - "traefik.http.routers.sharel-secured.tls=true"
+      - "traefik.http.routers.sharel-secured.tls.certresolver=myhttpchallenge"
+      - "traefik.http.routers.sharel-secured.entrypoints=web-secure"
+      - "traefik.http.middlewares.sharel-secured.forwardauth.trustForwardHeader=true"
+      # Docker loadbalance
+      - "traefik.http.services.sharel.loadbalancer.server.port=80"
+      - "traefik.http.services.sharel.loadbalancer.server.scheme=http"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.name=io"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.httponly=true"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.secure=true"
+      - "traefik.http.services.sharel.loadbalancer.sticky.cookie.samesite=lax"
+
     environment:
       OVERLEAF_APP_NAME: Overleaf
       OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex
@@ -29,11 +107,11 @@ services:
       OVERLEAF_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"} ]'
       OVERLEAF_RIGHT_FOOTER: '[{"text": "LDAP Overleaf (beta)"} ]'
       OVERLEAF_EMAIL_FROM_ADDRESS: "noreply@${MYDOMAIN}"
-      # OVERLEAF_EMAIL_AWS_SES_ACCESS_KEY_ID:
-      # OVERLEAF_EMAIL_AWS_SES_SECRET_KEY:
-      OVERLEAF_EMAIL_SMTP_HOST: smtp.${MYDOMAIN}
-      OVERLEAF_EMAIL_SMTP_PORT: 587
-      OVERLEAF_EMAIL_SMTP_SECURE: "false"
+      OVERLEAF_EMAIL_SMTP_HOST: ${OVERLEAF_EMAIL_SMTP_HOST:-smtp.${MYDOMAIN}}
+      OVERLEAF_EMAIL_SMTP_PORT: ${OVERLEAF_EMAIL_SMTP_PORT:-587}
+      OVERLEAF_EMAIL_SMTP_SECURE: ${OVERLEAF_EMAIL_SMTP_SECURE:-false}
+      OVERLEAF_EMAIL_SMTP_USER: ${OVERLEAF_EMAIL_SMTP_USER:-}
+      OVERLEAF_EMAIL_SMTP_PASS: ${OVERLEAF_EMAIL_SMTP_PASS:-}
       # OVERLEAF_EMAIL_SMTP_USER:
       # OVERLEAF_EMAIL_SMTP_PASS:
       # OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
@@ -48,52 +126,36 @@ services:
       OVERLEAF_ALLOW_PUBLIC_ACCESS: "true"
       OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
 
-      # Uncomment the following line to enable secure cookies if you are using SSL
-      # OVERLEAF_SECURE_COOKIE: "true"
-      # OVERLEAF_BEHIND_PROXY: "true"
+      OVERLEAF_SECURE_COOKIE: "true"
+      OVERLEAF_BEHIND_PROXY: "true"
 
-      LDAP_SERVER: ldaps://LDAPSERVER:636
-      LDAP_BASE: ou=people,dc=DOMAIN,dc=TLD
+      ALLOW_EMAIL_LOGIN: ${ALLOW_EMAIL_LOGIN:-true}
+      ALLOW_LDAP_LOGIN: ${ALLOW_LDAP_LOGIN:-true}
+      LDAP_SERVER: ${LDAP_SERVER:-}
+      LDAP_BASE: ${LDAP_BASE:-}
+      LDAP_BINDDN: ${LDAP_BINDDN:-}
+      LDAP_BIND_USER: ${LDAP_BIND_USER:-}
+      LDAP_BIND_PW: ${LDAP_BIND_PW:-}
+      LDAP_SERVER_CACERT: ${LDAP_SERVER_CACERT:-}
+      LDAP_USER_FILTER: ${LDAP_USER_FILTER:-}
+      LDAP_ADMIN_GROUP_FILTER: ${LDAP_ADMIN_GROUP_FILTER:-}
+      LDAP_CONTACT_FILTER: ${LDAP_CONTACT_FILTER:-}
+      LDAP_CONTACTS: ${LDAP_CONTACTS:-false}
 
-      ### There are to ways get users from the ldap server
-
-      ## NO LDAP BIND USER:
-      # Tries directly to bind with the login user (as uid)
-      # LDAP_BINDDN: uid=%u,ou=someunit,ou=people,dc=DOMAIN,dc=TLD
-
-      ## Or you can use ai global LDAP_BIND_USER
-      # LDAP_BIND_USER:
-      # LDAP_BIND_PW:
-
-      # Only allow users matching LDAP_USER_FILTER
-      LDAP_USER_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
-
-      # If user is in ADMIN_GROUP on user creation (first login) isAdmin is set to true.
-      # Admin Users can invite external (non ldap) users. This feature makes only sense
-      # when ALLOW_EMAIL_LOGIN is set to 'true'. Additionally admins can send
-      # system wide messages.
-      LDAP_ADMIN_GROUP_FILTER: "(memberof=cn=ADMINGROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
-      ALLOW_EMAIL_LOGIN: "true"
-
-      # All users in the LDAP_CONTACT_FILTER are loaded from the ldap server into contacts.
-      LDAP_CONTACT_FILTER: "(memberof=cn=GROUPNAME,ou=groups,dc=DOMAIN,dc=TLD)"
-      LDAP_CONTACTS: "false"
-
-      ## OAuth2 Settings
-      # OAUTH2_ENABLED: "true"
-      # OAUTH2_PROVIDER: YOUR_OAUTH2_PROVIDER
-      # OAUTH2_CLIENT_ID: YOUR_OAUTH2_CLIENT_ID
-      # OAUTH2_CLIENT_SECRET: YOUR_OAUTH2_CLIENT_SECRET
-      # OAUTH2_SCOPE: YOUR_OAUTH2_SCOPE
-      # OAUTH2_AUTHORIZATION_URL: YOUR_OAUTH2_AUTHORIZATION_URL
-      # OAUTH2_TOKEN_URL: YOUR_OAUTH2_TOKEN_URL
-      # OAUTH2_TOKEN_CONTENT_TYPE: # One of ['application/x-www-form-urlencoded', 'application/json']
-      # OAUTH2_PROFILE_URL: YOUR_OAUTH2_PROFILE_URL
-      # OAUTH2_USER_ATTR_EMAIL: email
-      # OAUTH2_USER_ATTR_UID: id
-      # OAUTH2_USER_ATTR_FIRSTNAME: name
-      # OAUTH2_USER_ATTR_LASTNAME:
-      # OAUTH2_USER_ATTR_IS_ADMIN: site_admin
+      OAUTH2_ENABLED: ${OAUTH2_ENABLED:-false}
+      OAUTH2_PROVIDER: ${OAUTH2_PROVIDER:-OAuth}
+      OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID:-}
+      OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET:-}
+      OAUTH2_SCOPE: ${OAUTH2_SCOPE:-openid profile email}
+      OAUTH2_AUTHORIZATION_URL: ${OAUTH2_AUTHORIZATION_URL:-}
+      OAUTH2_TOKEN_URL: ${OAUTH2_TOKEN_URL:-}
+      OAUTH2_TOKEN_CONTENT_TYPE: ${OAUTH2_TOKEN_CONTENT_TYPE:-application/x-www-form-urlencoded}
+      OAUTH2_PROFILE_URL: ${OAUTH2_PROFILE_URL:-}
+      OAUTH2_USER_ATTR_EMAIL: ${OAUTH2_USER_ATTR_EMAIL:-email}
+      OAUTH2_USER_ATTR_UID: ${OAUTH2_USER_ATTR_UID:-sub}
+      OAUTH2_USER_ATTR_FIRSTNAME: ${OAUTH2_USER_ATTR_FIRSTNAME:-given_name}
+      OAUTH2_USER_ATTR_LASTNAME: ${OAUTH2_USER_ATTR_LASTNAME:-family_name}
+      OAUTH2_USER_ATTR_IS_ADMIN: ${OAUTH2_USER_ATTR_IS_ADMIN:-}
 
       # Same property, unfortunately with different names in
       # different locations
@@ -108,40 +170,53 @@ services:
 
   mongo:
     restart: always
-    image: mongo:5.0
+    image: mongo:${MONGO_VERSION:-6.0}
     container_name: mongo
     expose:
       - 27017
     volumes:
       - ${MYDATA}/mongo_data:/data/db
     healthcheck:
-      test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+      #test: "mongosh --quiet --eval 'rs.hello().setName ? rs.hello().setName : rs.initiate({_id: \"overleaf\",members:[{_id: 0, host:\"mongo:27017\"}]})'"
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ ping: 1 }).ok ? 0 : 1)"]
       interval: 10s
       timeout: 10s
       retries: 5
+    networks:
+      - web
     command: "--replSet overleaf"
 
-  # See also: https://github.com/overleaf/overleaf/issues/1120
   mongoinit:
-    image: mongo:5.0
-    # this container will exit after executing the command
+    image: mongo:${MONGO_VERSION:-6.0}
+#    # this container will exit after executing the command
     restart: "no"
     depends_on:
       mongo:
         condition: service_healthy
     entrypoint:
       [
-        "mongo",
+        "mongosh",
         "--host",
         "mongo:27017",
         "--eval",
-        'rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] })',
+        'try { rs.status() } catch (error) { if (error.code !== 94) throw error; const result = rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] }); if (!result.ok) throw new Error(result.errmsg); }',
       ]
+    networks:
+      - web
 
   redis:
     restart: always
     image: redis:6.2
+    command: ["redis-server", "--appendonly", "${REDIS_AOF:-no}"]
     container_name: redis
+    # modify to get rid of the redis issue #35 and #19 with a better solution
+    # WARNING: /proc/sys/net/core/somaxconn is set to the lower value of 128.
+    # for vm overcommit: enable first on host system
+    # sysctl vm.overcommit_memory=1 (and add it to rc.local)
+    # then you do not need it in the redis container
+    sysctls:
+      - net.core.somaxconn=65535
+      # - vm.overcommit_memory=1
     expose:
       - 6379
     volumes:
@@ -151,3 +226,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

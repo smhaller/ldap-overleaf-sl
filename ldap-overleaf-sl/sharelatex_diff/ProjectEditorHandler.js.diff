@@ -1,8 +1,20 @@
-11c11
-<   trackChangesAvailable: false,
----
->   trackChangesAvailable: true,
-60c60
-<       trackChanges: false,
----
->       trackChanges: true,
+--- ldap-overleaf-sl/sharelatex_ori/ProjectEditorHandler.js
++++ ldap-overleaf-sl/sharelatex/ProjectEditorHandler.js
+@@ -4,7 +4,7 @@
+ const Features = require('../../infrastructure/Features')
+ 
+ module.exports = ProjectEditorHandler = {
+-  trackChangesAvailable: false,
++  trackChangesAvailable: true,
+ 
+   buildProjectModelView(project, members, invites) {
+     let owner, ownerFeatures
+@@ -43,7 +43,7 @@
+       references: false,
+       referencesSearch: false,
+       mendeley: false,
+-      trackChanges: false,
++      trackChanges: true,
+       trackChangesVisible: ProjectEditorHandler.trackChangesAvailable,
+       symbolPalette: false,
+     })

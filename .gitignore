@@ -1,6 +1,25 @@
 # Temporary files
-sharelatex/
-sharelatex_ori/
+/.env
+/.env.*
+!/.env.example
+/docker-compose.uibk.yml
+/docker-compose.uibk-oauth.yml
+/data/
+/sharelatex/
+/sharelatex_ori/
+/ldap-overleaf-sl/sharelatex_ori/*
+!/ldap-overleaf-sl/sharelatex_ori/AuthenticationManager.js
+!/ldap-overleaf-sl/sharelatex_ori/AuthenticationController.js
+!/ldap-overleaf-sl/sharelatex_ori/ContactController.js
+!/ldap-overleaf-sl/sharelatex_ori/ProjectEditorHandler.js
+!/ldap-overleaf-sl/sharelatex_ori/TrackChangesController.js
+!/ldap-overleaf-sl/sharelatex_ori/router.js
+!/ldap-overleaf-sl/sharelatex_ori/login.pug
+!/ldap-overleaf-sl/sharelatex_ori/navbar-marketing.pug
+!/ldap-overleaf-sl/sharelatex_ori/navbar-marketing-bootstrap-5.pug
+!/ldap-overleaf-sl/sharelatex_ori/admin-index.pug
+!/ldap-overleaf-sl/sharelatex_ori/admin-sysadmin.pug
+/scripts/tests/node_modules/
 
 # Compiled Object files
 *.slo

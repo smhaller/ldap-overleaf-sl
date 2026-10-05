@@ -3,306 +3,133 @@ const ChatManager = require('../Chat/ChatManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const SessionManager = require('../Authentication/SessionManager')
 const UserInfoManager = require('../User/UserInfoManager')
+const UserInfoController = require('../User/UserInfoController')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const { Project } = require('../../models/Project')
-const pLimit = require('p-limit')
 
-async function _updateTCState (projectId, state, callback) {
-  await Project.updateOne({_id: projectId}, {track_changes: state}).exec()
-  callback()
-}
-function _transformId(doc) {
-  if (doc._id) {
-    doc.id = doc._id;
-    delete doc._id;
-  }
-  return doc;
+function requestError(message, status = 400) {
+  return Object.assign(new Error(message), { status })
 }
 
-const TrackChangesController = {
-  trackChanges(req, res, next) {
-    const { project_id } = req.params
-    let state = req.body.on || req.body.on_for
-    if ( req.body.on_for_guests && !req.body.on ) state.__guests__ = true
+function loggedInUserId(req) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  if (userId == null) throw requestError('no logged-in user', 401)
+  return userId
+}
 
-    return _updateTCState(project_id, state,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'toggle-track-changes',
-          state
-        )
-        return res.sendStatus(204)
-      }
-    )
-  },
-  acceptChanges(req, res, next) {
-    const { project_id, doc_id } = req.params
-    const change_ids = req.body.change_ids
-    return DocumentUpdaterHandler.acceptChanges(
-      project_id,
-      doc_id,
-      change_ids,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'accept-changes',
-          doc_id,
-          change_ids,
-        )
-        return res.sendStatus(204)
-      }
-    )
-  },
-  async getAllRanges(req, res, next) {
-    const { project_id } = req.params
-    // FIXME: ranges are from mongodb, probably already outdated
-    const ranges = await DocstoreManager.promises.getAllRanges(project_id)
-// frontend expects 'id', not '_id'
-    return res.json(ranges.map(_transformId))
-  },
-  async getChangesUsers(req, res, next) {
-    const { project_id } = req.params
-    const memberIds = await CollaboratorsGetter.promises.getMemberIds(project_id)
-    // FIXME: Does not work properly if the user is no longer a member of the project
-    // memberIds from DocstoreManager.getAllRanges(project_id) is not a remedy
-    // because ranges are not updated in real-time
-    const limit = pLimit(3)
-    const users = await Promise.all(
-      memberIds.map(memberId =>
-        limit(async () => {
-          const user = await UserInfoManager.promises.getPersonalInfo(memberId)
-          return user
-        })
+async function projectRanges(projectId) {
+  await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
+  return DocstoreManager.promises.getAllRanges(projectId)
+}
+
+const handlers = {
+  async trackChanges(req, res) {
+    const { project_id: projectId } = req.params
+    const { on, on_for: onFor, on_for_guests: onForGuests } = req.body
+    if (on !== undefined && typeof on !== 'boolean') throw requestError('on must be a boolean')
+    if (onForGuests !== undefined && typeof onForGuests !== 'boolean') throw requestError('on_for_guests must be a boolean')
+    if (onFor !== undefined && (
+      onFor === null || typeof onFor !== 'object' || Array.isArray(onFor) ||
+      Object.entries(onFor).some(([userId, enabled]) =>
+        !/^(?:[a-f\d]{24}|__guests__)$/.test(userId) || typeof enabled !== 'boolean'
       )
-    )
-    users.push({_id: null}) // An anonymous user won't cause any harm
-// frontend expects 'id', not '_id'
-    return res.json(users.map(_transformId))
-  },
-  getThreads(req, res, next) {
-    const { project_id } = req.params
-    return ChatApiHandler.getThreads(
-      project_id,
-      function (err, messages) {
-        if (err != null) {
-          return next(err)
-        }
-        return ChatManager.injectUserInfoIntoThreads(
-          messages,
-          function (err) {
-            if (err != null) {
-              return next(err)
-            }
-            return res.json(messages)
-          }
-        )
-      }
-    )
-  },
-  sendComment(req, res, next) {
-    const { project_id, thread_id } = req.params
-    const { content } = req.body
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    if (user_id == null) {
-      const err = new Error('no logged-in user')
-      return next(err)
+    )) throw requestError('on_for must map user IDs to booleans')
+    if (on === undefined && onFor === undefined && onForGuests === undefined) throw requestError('missing track changes state')
+    let state = on === true ? true : onFor !== undefined ? { ...onFor } : on ?? false
+    if (onForGuests !== undefined && state !== true) {
+      if (typeof state !== 'object') state = {}
+      state.__guests__ = onForGuests
     }
-    return ChatApiHandler.sendComment(
-      project_id,
-      thread_id,
-      user_id,
-      content,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        return UserInfoManager.getPersonalInfo(
-          user_id,
-          function (err, user) {
-            if (err != null) {
-              return next(err)
-            }
-            message.user = user
-            EditorRealTimeController.emitToRoom(
-              project_id,
-              'new-comment',
-              thread_id, message
-            )
-            return res.sendStatus(204)
-          }
-        )
-      }
-    )
+    await Project.updateOne({ _id: projectId }, { $set: { track_changes: state } }).exec()
+    EditorRealTimeController.emitToRoom(projectId, 'toggle-track-changes', state)
+    res.sendStatus(204)
   },
-  editMessage(req, res, next) {
-    const { project_id, thread_id, message_id } = req.params
-    const { content } = req.body
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    if (user_id == null) {
-      const err = new Error('no logged-in user')
-      return next(err)
+  async acceptChanges(req, res) {
+    const { project_id: projectId, doc_id: docId } = req.params
+    const { change_ids: changeIds } = req.body
+    if (!Array.isArray(changeIds) || changeIds.some(changeId => typeof changeId !== 'string')) throw requestError('change_ids must be an array of strings')
+    await DocumentUpdaterHandler.promises.acceptChanges(projectId, docId, changeIds)
+    EditorRealTimeController.emitToRoom(projectId, 'accept-changes', docId, changeIds)
+    res.sendStatus(204)
+  },
+  async getAllRanges(req, res) {
+    const ranges = await projectRanges(req.params.project_id)
+    res.json(ranges.map(({ _id, id, ...range }) => ({ ...range, id: String(id ?? _id) })))
+  },
+  async getChangesUsers(req, res) {
+    const projectId = req.params.project_id
+    const memberIds = await CollaboratorsGetter.promises.getMemberIds(projectId)
+    const ranges = await projectRanges(projectId)
+    const userIds = new Set(memberIds.map(String))
+    for (const doc of ranges) {
+      for (const change of doc.ranges?.changes || []) {
+        if (change.metadata?.user_id != null) userIds.add(String(change.metadata.user_id))
+      }
     }
-    return ChatApiHandler.editMessage(
-      project_id,
-      thread_id,
-      message_id,
-      user_id,
-      content,
-      function (err, message) {
-        if (err != null) {
-            return next(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'edit-message',
-          thread_id,
-          message_id,
-          content
-        )
-        return res.sendStatus(204)
-      }
-    )
-  },
-  deleteMessage(req, res, next) {
-    const { project_id, thread_id, message_id } = req.params
-    return ChatApiHandler.deleteMessage(
-      project_id,
-      thread_id,
-      message_id,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'delete-message',
-          thread_id,
-          message_id
-        )
-        return res.sendStatus(204)
-      }
-    )
-  },
-  resolveThread(req, res, next) {
-    const { project_id, doc_id, thread_id } = req.params
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    if (user_id == null) {
-      const err = new Error('no logged-in user')
-      return next(err)
+    const users = []
+    for (const userId of userIds) {
+      const user = await UserInfoManager.promises.getPersonalInfo(userId)
+      if (user) users.push(UserInfoController.formatPersonalInfo(user))
     }
-    DocumentUpdaterHandler.resolveThread(
-      project_id,
-      doc_id,
-      thread_id,
-      user_id,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-      }
-    )
-    return ChatApiHandler.resolveThread(
-      project_id,
-      thread_id,
-      user_id,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        return UserInfoManager.getPersonalInfo(
-          user_id,
-          function (err, user) {
-            if (err != null) {
-              return next(err)
-            }
-            EditorRealTimeController.emitToRoom(
-              project_id,
-              'resolve-thread',
-              thread_id,
-              user_id
-            )
-            return res.sendStatus(204)
-          }
-        )
-      }
-    )
+    users.push({ id: null })
+    res.json(users)
   },
-  reopenThread(req, res, next) {
-    const { project_id, doc_id, thread_id } = req.params
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    if (user_id == null) {
-      const err = new Error('no logged-in user')
-      return next(err)
-    }
-    DocumentUpdaterHandler.reopenThread(
-      project_id,
-      doc_id,
-      thread_id,
-      user_id,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-      }
-    )
-    return ChatApiHandler.reopenThread(
-      project_id,
-      thread_id,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          project_id,
-          'reopen-thread',
-          thread_id
-        )
-        return res.sendStatus(204)
-      }
-    )
+  async getThreads(req, res) {
+    const threads = await ChatApiHandler.promises.getThreads(req.params.project_id)
+    await ChatManager.promises.injectUserInfoIntoThreads(threads)
+    res.json(threads)
   },
-  deleteThread(req, res, next) {
-    const { project_id, doc_id, thread_id } = req.params
-    const user_id = SessionManager.getLoggedInUserId(req.session)
-    if (user_id == null) {
-      const err = new Error('no logged-in user')
-      return next(err)
-    }
-    return DocumentUpdaterHandler.deleteThread(
-      project_id,
-      doc_id,
-      thread_id,
-      user_id,
-      function (err, message) {
-        if (err != null) {
-          return next(err)
-        }
-        ChatApiHandler.deleteThread(
-          project_id,
-          thread_id,
-          function (err, message) {
-            if (err != null) {
-              return next(err)
-            }
-            EditorRealTimeController.emitToRoom(
-              project_id,
-              'delete-thread',
-              thread_id
-            )   
-            return res.sendStatus(204)
-          }
-        )
-      }
-    )
+  async sendComment(req, res) {
+    const { project_id: projectId, thread_id: threadId } = req.params
+    const userId = loggedInUserId(req)
+    const message = await ChatApiHandler.promises.sendComment(projectId, threadId, userId, req.body.content)
+    const user = await UserInfoManager.promises.getPersonalInfo(userId)
+    message.user = UserInfoController.formatPersonalInfo(user)
+    EditorRealTimeController.emitToRoom(projectId, 'new-comment', threadId, message)
+    res.sendStatus(204)
+  },
+  async editMessage(req, res) {
+    const { project_id: projectId, thread_id: threadId, message_id: messageId } = req.params
+    await ChatApiHandler.promises.editMessage(projectId, threadId, messageId, loggedInUserId(req), req.body.content)
+    EditorRealTimeController.emitToRoom(projectId, 'edit-message', threadId, messageId, req.body.content)
+    res.sendStatus(204)
+  },
+  async deleteMessage(req, res) {
+    const { project_id: projectId, thread_id: threadId, message_id: messageId } = req.params
+    loggedInUserId(req)
+    await ChatApiHandler.promises.deleteMessage(projectId, threadId, messageId)
+    EditorRealTimeController.emitToRoom(projectId, 'delete-message', threadId, messageId)
+    res.sendStatus(204)
+  },
+  async resolveThread(req, res) {
+    const { project_id: projectId, doc_id: docId, thread_id: threadId } = req.params
+    const userId = loggedInUserId(req)
+    if (docId != null) await DocumentUpdaterHandler.promises.resolveThread(projectId, docId, threadId, userId)
+    await ChatApiHandler.promises.resolveThread(projectId, threadId, userId)
+    EditorRealTimeController.emitToRoom(projectId, 'resolve-thread', threadId, userId)
+    res.sendStatus(204)
+  },
+  async reopenThread(req, res) {
+    const { project_id: projectId, doc_id: docId, thread_id: threadId } = req.params
+    await DocumentUpdaterHandler.promises.reopenThread(projectId, docId, threadId, loggedInUserId(req))
+    await ChatApiHandler.promises.reopenThread(projectId, threadId)
+    EditorRealTimeController.emitToRoom(projectId, 'reopen-thread', threadId)
+    res.sendStatus(204)
+  },
+  async deleteThread(req, res) {
+    const { project_id: projectId, doc_id: docId, thread_id: threadId } = req.params
+    await DocumentUpdaterHandler.promises.deleteThread(projectId, docId, threadId, loggedInUserId(req))
+    await ChatApiHandler.promises.deleteThread(projectId, threadId)
+    EditorRealTimeController.emitToRoom(projectId, 'delete-thread', threadId)
+    res.sendStatus(204)
   },
 }
-module.exports = TrackChangesController
+
+module.exports = Object.fromEntries(
+  Object.entries(handlers).map(([name, handler]) => [
+    name,
+    (req, res, next) => handler(req, res).catch(next),
+  ])
+)

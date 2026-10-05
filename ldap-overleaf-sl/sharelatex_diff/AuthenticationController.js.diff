@@ -1,34 +1,35 @@
-300a301,394
+29a30
+> const crypto = require('crypto')
+333a335,421
 >   oauth2Redirect(req, res, next) {
->     // random state
->     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
->     const state = new Array(6).fill(0).map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join("")
->     req.session.oauth2State = state
-> 
->     const redirectURI = encodeURIComponent(`${process.env.OVERLEAF_SITE_URL}/oauth/callback`) 
->     const authURL = (
->       process.env.OAUTH2_AUTHORIZATION_URL
->       + `?response_type=code`
->       + `&client_id=${process.env.OAUTH2_CLIENT_ID}`
->       + `&redirect_uri=${redirectURI}`
->       + `&scope=${process.env.OAUTH2_SCOPE ?? ""} `
->       + `&state=${state}`
->     )
->     res.redirect(authURL)
+>     try {
+>       const state = crypto.randomBytes(32).toString('hex')
+>       const authURL = new URL(process.env.OAUTH2_AUTHORIZATION_URL)
+>       authURL.searchParams.set('response_type', 'code')
+>       authURL.searchParams.set('client_id', process.env.OAUTH2_CLIENT_ID)
+>       authURL.searchParams.set('redirect_uri', `${process.env.OVERLEAF_SITE_URL}/oauth/callback`)
+>       authURL.searchParams.set('scope', process.env.OAUTH2_SCOPE || '')
+>       authURL.searchParams.set('state', state)
+>       req.session.oauth2State = state
+>       res.redirect(authURL.toString())
+>     } catch (error) {
+>       next(error)
+>     }
 >   },
 > 
 >   async oauth2Callback(req, res, next) {
->     console.log(`OAuth, receive code ${req.query.code} and state ${req.query.state}`)
->     const saveState = req.session.oauth2State
+>     const savedState = req.session.oauth2State
 >     delete req.session.oauth2State
->     if (saveState !== req.query.state) {
+>     if (typeof savedState !== 'string' || !savedState ||
+>         typeof req.query.state !== 'string' || !tsscmp(savedState, req.query.state) ||
+>         typeof req.query.code !== 'string' || !req.query.code) {
 >       return AuthenticationController.finishLogin(false, req, res, next)
 >     }
 > 
 >     try {
 >       const contentType = process.env.OAUTH2_TOKEN_CONTENT_TYPE || 'application/x-www-form-urlencoded'
 >       const bodyParams = {
->         grant_type: "authorization_code",
+>         grant_type: 'authorization_code',
 >         client_id: process.env.OAUTH2_CLIENT_ID,
 >         client_secret: process.env.OAUTH2_CLIENT_SECRET,
 >         code: req.query.code,
@@ -41,55 +42,49 @@
 >       const tokenResponse = await fetch(process.env.OAUTH2_TOKEN_URL, {
 >         method: 'POST',
 >         headers: {
->           "Accept": "application/json",
->           "Content-Type": contentType,
+>           Accept: 'application/json',
+>           'Content-Type': contentType,
 >         },
->         body
+>         body,
 >       })
->       
+>       if (!tokenResponse.ok) {
+>         throw new Error('OAuth token request failed')
+>       }
 >       const tokenData = await tokenResponse.json()
->       console.log("OAuth2 respond", JSON.stringify(tokenData))
+>       if (typeof tokenData.access_token !== 'string' || !tokenData.access_token) {
+>         throw new Error('OAuth token response missing access token')
+>       }
 > 
 >       const profileResponse = await fetch(process.env.OAUTH2_PROFILE_URL, {
 >         method: 'GET',
 >         headers: {
->           "Accept": "application/json",
->           "Authorization": `Bearer ${tokenData.access_token}`,
->         }
->       });
->       const profile = await profileResponse.json()
->       console.log("OAuth2 user profile", JSON.stringify(profile))
-> 
->       const email = profile[process.env.OAUTH2_USER_ATTR_EMAIL ?? "email"]
->       const uid = profile[process.env.OAUTH2_USER_ATTR_UID ?? "uid"]
->       const firstname = profile?.[process.env.OAUTH2_USER_ATTR_FIRSTNAME] ?? email
->       const lastname = process.env.OAUTH2_USER_ATTR_LASTNAME
->         ? profile?.[process.env.OAUTH2_USER_ATTR_LASTNAME] ?? ""
->         : ""
->       const isAdmin = process.env.OAUTH2_USER_ATTR_IS_ADMIN
->         ? !!profile?.[process.env.OAUTH2_USER_ATTR_IS_ADMIN] ?? false
->         : false
-> 
->       const query = { email }
->       const callback = (error, user) => {
->         if (error) {
->           res.json({message: error});
->         } else {
->           console.log("OAuth user", JSON.stringify(user));
->           AuthenticationController.finishLogin(user, req, res, next);
->         }
+>           Accept: 'application/json',
+>           Authorization: `Bearer ${tokenData.access_token}`,
+>         },
+>       })
+>       if (!profileResponse.ok) {
+>         throw new Error('OAuth profile request failed')
 >       }
->       AuthenticationManager.createIfNotFoundAndLogin(
->         query,
->         callback,
->         uid,
->         firstname,
->         lastname,
+>       const profile = await profileResponse.json()
+>       const rawEmail = profile?.[process.env.OAUTH2_USER_ATTR_EMAIL || 'email']
+>       const email = typeof rawEmail === 'string' ? EmailHelper.parseEmail(rawEmail) : null
+>       if (!email || profile.email_verified === false) {
+>         throw new Error('OAuth profile missing a valid verified email')
+>       }
+>       const firstName = profile[process.env.OAUTH2_USER_ATTR_FIRSTNAME]
+>       const lastName = profile[process.env.OAUTH2_USER_ATTR_LASTNAME]
+>       const adminClaim = process.env.OAUTH2_USER_ATTR_IS_ADMIN
+>         ? profile[process.env.OAUTH2_USER_ATTR_IS_ADMIN]
+>         : false
+>       const user = await AuthenticationManager.promises.provisionExternalUser({
 >         email,
->         isAdmin
->       )
->     } catch(e) {
->       res.redirect("/login")
->       console.error("Fails to access by OAuth2: " + String(e))
+>         first_name: typeof firstName === 'string' ? firstName : email,
+>         last_name: typeof lastName === 'string' ? lastName : '',
+>         isAdmin: adminClaim === true || adminClaim === 'true' || adminClaim === 1 || adminClaim === '1',
+>       })
+>       AuthenticationController.setAuditInfo(req, { method: 'OAuth2 login' })
+>       await AuthenticationController.promises.finishLogin(user, req, res)
+>     } catch (error) {
+>       return next(error)
 >     }
 >   },
