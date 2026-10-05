@@ -48,7 +48,6 @@ COPY sharelatex/router.js                   /overleaf/services/web/app/src/route
 COPY sharelatex/login.pug       /overleaf/services/web/app/views/user/
 #COPY sharelatex/navbar.pug      /overleaf/services/web/app/views/layout/
 COPY sharelatex/navbar-marketing.pug      /overleaf/services/web/app/views/layout/
-COPY sharelatex/navbar-marketing-bootstrap-5.pug /overleaf/services/web/app/views/layout/
 
 # Copy TrackChanges Module
 #COPY sharelatex-modules/track-changes  /overleaf/services/web/modules/track-changes
