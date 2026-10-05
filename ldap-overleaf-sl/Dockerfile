@@ -37,6 +37,8 @@ COPY sharelatex/ContactController.js        /overleaf/services/web/app/src/Featu
 COPY sharelatex/ProjectEditorHandler.js     /overleaf/services/web/app/src/Features/Project/
 COPY sharelatex/TrackChangesController.js   /overleaf/services/web/app/src/Features/TrackChanges/
 COPY sharelatex/router.js                   /overleaf/services/web/app/src/router.mjs
+RUN node --check app/src/router.mjs && \
+    node -e 'const source = require("node:fs").readFileSync("app/src/router.mjs", "utf8"); if (!/^export default \{ initialize, rateLimiters \}/m.test(source)) throw new Error("router.mjs must export the Overleaf router as default; regenerate the 5.5.8 overlays")'
 
 
 

@@ -2,8 +2,6 @@
 /.env
 /.env.*
 !/.env.example
-/docker-compose.uibk.yml
-/docker-compose.uibk-oauth.yml
 /data/
 /sharelatex/
 /sharelatex_ori/

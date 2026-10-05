@@ -44,8 +44,8 @@ docker compose logs -f sharelatex
 
 [.env.example](.env.example) is the public, generic configuration template for
 new installations. `.env` stays local and ignored, and has been removed from the
-Git index. Local `docker-compose.uibk.yml` and `docker-compose.uibk-oauth.yml`
-remain on disk but are ignored and are not portable deployment examples.
+Git index. Institution-specific Compose variants have been removed; configure
+LDAP, OAuth, SMTP and storage through the local `.env` instead.
 Do not commit secrets. Compose reads `.env`; [Makefile](Makefile) does not include
 or execute it. `make build` runs `docker compose build sharelatex` and does not
 start any database or application containers.
