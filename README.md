@@ -1,4 +1,14 @@
-# LDAP and OAuth for Overleaf Community Edition
+# NOTE
+
+This project focuses on adding LDAP/OIDC authentication to Overleaf/ShareLaTeX.
+
+For a more comprehensive solution that includes these features and extends Overleaf Community Edition with additional functionality, please also have a look at https://github.com/yu-i-i/overleaf-cep/
+
+If overleaf-cep covers your requirements, we recommend considering it before using this project, especially because it has a broader group of contributors involved in its ongoing maintenance.
+
+
+
+## LDAP and OAuth for Overleaf Community Edition
 
 This repository adds independent local-password, LDAP and OAuth authentication to
 [Overleaf Community Edition](https://github.com/overleaf/overleaf). The image is
@@ -7,7 +17,7 @@ based on `sharelatex/sharelatex:5.5.8`; overlays target its verified source revi
 The original LDAP implementation was inspired by
 [worksasintended](https://github.com/worksasintended).
 
-## Deployment
+### Deployment
 
 [docker-compose.yml](docker-compose.yml) is the canonical, consolidated stack:
 Traefik, Overleaf, MongoDB 6.0, an idempotent `mongoinit`, and Redis 6.2.
@@ -88,7 +98,7 @@ For initial administrator creation, follow the upstream
 **Compilation has shell escape enabled. Use this deployment only with trusted
 users; it is not an isolated service for arbitrary untrusted TeX submissions.**
 
-## Authentication
+### Authentication
 
 All authentication variables below are forwarded by canonical Compose.
 `ALLOW_EMAIL_LOGIN` independently enables local database password verification.
@@ -104,7 +114,7 @@ users must choose the available password form themselves. `/login` redirects to
 OAuth only when OAuth is enabled and neither password backend is enabled.
 Otherwise it shows the enabled password form and OAuth button together.
 
-### OAuth and Password Fallback Modes
+#### OAuth and Password Fallback Modes
 
 | Mode | `OAUTH2_ENABLED` | `ALLOW_EMAIL_LOGIN` | `ALLOW_LDAP_LOGIN` | `LDAP_SERVER` |
 | --- | --- | --- | --- | --- |
@@ -126,7 +136,7 @@ and the existing Overleaf main email identical to reuse an account instead of
 creating a new one. Coordinate identity/email changes and verify account ownership;
 do not treat a different email as an automatic account merge.
 
-### LDAP
+#### LDAP
 
 Example `.env` settings (replace directory names and credentials):
 
@@ -161,7 +171,7 @@ not enable LDAP login and does not depend on `ALLOW_LDAP_LOGIN`. Older configura
 using `LDAP_GROUP_FILTER` must rename it to `LDAP_USER_FILTER`; contact filtering
 uses its separate setting.
 
-### OAuth2
+#### OAuth2
 
 ```dotenv
 OAUTH2_ENABLED=true
@@ -189,7 +199,7 @@ does not independently establish ownership from an arbitrary profile claim.
 Name mappings and the optional trusted admin claim apply when creating an account.
 Do not map an untrusted/self-editable claim to admin privileges.
 
-## Migrating 5.0.x to 5.5.8
+### Migrating 5.0.x to 5.5.8
 
 **Do not launch the new stack yet.** Overleaf 5.5 requires MongoDB 6.0 with
 featureCompatibilityVersion (FCV) `6.0`. Test the procedure on restored data first.
@@ -294,7 +304,7 @@ Override `TEXLIVE_REPOSITORY` in `.env` (Compose build argument), or use
 `--build-arg TEXLIVE_REPOSITORY=...` with a direct Docker build. Use a matching
 2025 archive and retain TLS verification; do not use a rolling cross-year mirror.
 
-## Verification and Development
+### Verification and Development
 
 After migration, check local/LDAP success and denial, every enabled OAuth/fallback
 mode, contact sharing, native admin controls, compilation (including biber and
